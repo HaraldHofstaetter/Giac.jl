@@ -1,8 +1,8 @@
 all: shared_lib
 
 CFLAGS = #-g 
-CC = gcc $(CFLAGS)
-CPP = g++ $(CFLAGS)
+CC = gcc-4.9 $(CFLAGS)
+CPP = g++-4.9 $(CFLAGS)
 
 LIBDIR =
 INCDIR = -I /usr/include/giac

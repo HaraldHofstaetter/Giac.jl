@@ -6,8 +6,10 @@ export Gen
 
 function __init__()
     global libgiac_c
+    global context_ptr
     libgiac_c = Libdl.dlopen(joinpath(dirname(@__FILE__), "..", "deps", "lib",
                      string("libgiac_c.", Libdl.dlext)))
+    context_ptr = ccall(Libdl.dlsym(libgiac_c, "get_context_ptr"), Ptr{Void}, () )                     
 end
 
 
@@ -238,6 +240,13 @@ function Gen(a::Cdouble, b::Cdouble)
 end
 
 Gen(val::Complex{Cdouble}) = Gen(real(val), imag(val))
+
+function Gen(s::ASCIIString)
+    c = ccall(Libdl.dlsym(libgiac_c, "gen_new_c_string"), Ptr{Void}, (Ptr{UInt8},Ptr{Void}), s, context_ptr)
+    g = _gen(c)
+    finalizer(g, _delete)
+    g
+end
 
 
 

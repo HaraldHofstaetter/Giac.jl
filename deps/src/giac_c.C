@@ -3,11 +3,17 @@
 
 #include "giac.h"
 #include "giac_c.h"
+#include<string>
 
 using namespace std;
 using namespace giac;
 
 extern "C" {
+
+    void* get_context_ptr()
+    {
+         return reinterpret_cast<void*>( new context() );
+    }
 
     _Gen* gen_new_int(int val)
     {
@@ -46,6 +52,14 @@ extern "C" {
         gen r0(fraction(*num0, *den0));
         return reinterpret_cast<_Gen*>( new gen(r0) );
     }    
+
+    _Gen* gen_new_c_string(char *cs, void *cp)
+    {
+        context* cp0 = reinterpret_cast<context*>(cp);
+        std::string s(cs);
+        gen r0(s, cp0);
+        return reinterpret_cast<_Gen*>( new gen(r0) );
+    }
 
 
     void gen_delete(_Gen* g)
@@ -95,10 +109,11 @@ extern "C" {
 
 
 
-    char* gen_to_c_string(_Gen* g)
+    char* gen_to_c_string(_Gen* g, void *cp)
     {
         gen* g0 = reinterpret_cast<gen*>(g);
-        //string s(g0->print(context0)); 
+        //context* cp0 = reinterpret_cast<context*>(cp);
+        //string s(g0->print(cp0)); 
         // the above does not work, don't know which context...
         ostringstream os;
         os << *g0;
