@@ -55,6 +55,7 @@ extern "C"
 
     _Gen* giac_eval(_Gen* g, int levels, void *context_ptr);
     _Gen* giac_evalf(_Gen* g, int levels, void *context_ptr);
+    _Gen* giac_simplify(_Gen* g, void *context_ptr);
 
 #ifdef __cplusplus
 }

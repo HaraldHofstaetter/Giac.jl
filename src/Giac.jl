@@ -8,6 +8,7 @@ import Base: sinh, cosh, tanh, asin, acos, atan
 import Base: asinh, acosh, atanh
 
 export @giac, giac, Gen, evaluate, evaluatef, value, evalf, giac_identifier
+export simplify
 
 
 
@@ -385,6 +386,13 @@ end
 
 #eval = evaluate  # cannot overload Base.eval
 evalf = evaluatef
+
+function simplify(a::Gen)
+   _gen(ccall(Libdl.dlsym(libgiac_c, "giac_simplify"), Ptr{Void}, (Ptr{Void},Ptr{Void}), a.g, context_ptr))
+end   
+
+evaluate(s::ASCIIString) = evaluate(Gen(s))
+
 
 
 

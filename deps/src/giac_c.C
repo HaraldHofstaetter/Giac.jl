@@ -339,6 +339,15 @@ extern "C" {
         return reinterpret_cast<_Gen*>( r0 );
     }
 
+    
+    _Gen* giac_simplify(_Gen* g, void *cp)
+    {
+        gen* g0 = reinterpret_cast<gen*>(g);
+        context* cp0 = reinterpret_cast<context*>(cp);
+        gen* r0 = new gen();
+        *r0 = simplify(*g0, cp0);
+        return reinterpret_cast<_Gen*>( r0 );
+    }
 
     char* giac_to_c_string(_Gen* g, void *cp)
     {
