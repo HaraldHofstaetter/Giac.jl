@@ -22,7 +22,8 @@ extern "C"
 
     void giac_delete(_Gen* g);
 
-    char* giac_to_c_string(_Gen* g, void *context_ptr);
+    char* giac_to_string(_Gen* g, void *context_ptr);
+    char* giac_to_latex(_Gen* g, void *context_ptr);
 
     _Gen* giac_plus(_Gen *a, _Gen *b);
     _Gen* giac_minus(_Gen *a, _Gen *b);
@@ -56,6 +57,8 @@ extern "C"
     _Gen* giac_eval(_Gen* g, int levels, void *context_ptr);
     _Gen* giac_evalf(_Gen* g, int levels, void *context_ptr);
     _Gen* giac_simplify(_Gen* g, void *context_ptr);
+    _Gen* giac_expand(_Gen* g, void *context_ptr);
+    _Gen* giac_factor(_Gen* g, int with_sqrt, void *context_ptr);
 
 #ifdef __cplusplus
 }

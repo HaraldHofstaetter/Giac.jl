@@ -1,14 +1,15 @@
 __precompile__()
 module Giac
 
-import Base: string, show, +, -, (*), /, ^
+import Base: string, show, write, writemime, expand, factor
+import Base: +, -, (*), /, ^
 import Base: real, imag, conj, abs
 import Base: sqrt, exp, log, sin, cos, tan
 import Base: sinh, cosh, tanh, asin, acos, atan
 import Base: asinh, acosh, atanh
 
 export @giac, giac, Gen, evaluate, evaluatef, value, evalf, giac_identifier
-export simplify
+export simplify, latex
 
 
 
@@ -308,7 +309,14 @@ giac = Gen
 
 
 function string(g::Gen)
-   cs = ccall(Libdl.dlsym(libgiac_c, "giac_to_c_string"), Ptr{UInt8}, (Ptr{Void},Ptr{Void}), g.g, context_ptr) 
+   cs = ccall(Libdl.dlsym(libgiac_c, "giac_to_string"), Ptr{UInt8}, (Ptr{Void},Ptr{Void}), g.g, context_ptr) 
+   s = bytestring(cs)
+   ccall((:free, "libc"), Void, (Ptr{Void},), cs)
+   s
+end
+
+function latex(g::Gen)
+   cs = ccall(Libdl.dlsym(libgiac_c, "giac_to_latex"), Ptr{UInt8}, (Ptr{Void},Ptr{Void}), g.g, context_ptr) 
    s = bytestring(cs)
    ccall((:free, "libc"), Void, (Ptr{Void},), cs)
    s
@@ -316,7 +324,8 @@ end
 
 show(io::IO, g::Gen) = print(io, string(g))
 
-
+writemime(io::IO, ::MIME"application/x-latex", ex::Gen) = write(io, "\$", latex(ex), "\$")
+writemime(io::IO, ::MIME"text/latex",  ex::Gen) = write(io, "\$", latex(ex), "\$")
 
    
 function +(a::Gen, b::Gen)
@@ -393,7 +402,14 @@ end
 
 evaluate(s::ASCIIString) = evaluate(Gen(s))
 
+function expand(a::Gen)
+   _gen(ccall(Libdl.dlsym(libgiac_c, "giac_expand"), Ptr{Void}, (Ptr{Void},Ptr{Void}), a.g, context_ptr))
+end   
 
+function factor(a::Gen; with_sqrt::Bool=false)
+   _gen(ccall(Libdl.dlsym(libgiac_c, "giac_factor"), Ptr{Void}, (Ptr{Void},Cint, Ptr{Void}), 
+              a.g, with_sqrt?1:0, context_ptr))
+end   
 
 
 value(g::Gen) = g

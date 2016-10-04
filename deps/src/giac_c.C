@@ -270,7 +270,7 @@ extern "C" {
         gen* a0 = reinterpret_cast<gen*>(a);
         context* cp0 = reinterpret_cast<context*>(cp);
         gen* r0 = new gen();
-        *r0 = sinh(*a0, cp0);
+        *r0 = asin(*a0, cp0);
         return reinterpret_cast<_Gen*>(r0);
     }
 
@@ -349,11 +349,40 @@ extern "C" {
         return reinterpret_cast<_Gen*>( r0 );
     }
 
-    char* giac_to_c_string(_Gen* g, void *cp)
+    _Gen* giac_expand(_Gen* g, void *cp)
+    {
+        gen* g0 = reinterpret_cast<gen*>(g);
+        context* cp0 = reinterpret_cast<context*>(cp);
+        gen* r0 = new gen();
+        *r0 = expand(*g0, cp0);
+        return reinterpret_cast<_Gen*>( r0 );
+    }
+
+    _Gen* giac_factor(_Gen* g, int with_sqrt, void *cp)
+    {
+        gen* g0 = reinterpret_cast<gen*>(g);
+        context* cp0 = reinterpret_cast<context*>(cp);
+        gen* r0 = new gen();
+        *r0 = factor(*g0, with_sqrt!=0, cp0);
+        return reinterpret_cast<_Gen*>( r0 );
+    }
+    
+
+    char* giac_to_string(_Gen* g, void *cp)
     {
         gen* g0 = reinterpret_cast<gen*>(g);
         context* cp0 = reinterpret_cast<context*>(cp);
         string s(g0->print(cp0)); 
+        char* cs = (char*) malloc(sizeof(char)*(s.length()+1));
+        strcpy(cs, s.c_str());
+        return cs;
+    }
+
+    char* giac_to_latex(_Gen* g, void *cp)
+    {
+        gen* g0 = reinterpret_cast<gen*>(g);
+        context* cp0 = reinterpret_cast<context*>(cp);
+        string s(gen2tex(*g0,cp0)); 
         char* cs = (char*) malloc(sizeof(char)*(s.length()+1));
         strcpy(cs, s.c_str());
         return cs;
