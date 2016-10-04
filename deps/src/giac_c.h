@@ -7,24 +7,54 @@ extern "C"
 
     void* get_context_ptr();
 
-    _Gen* gen_new_int(int val);
-    _Gen* gen_new_int64_t(int64_t val);
-    _Gen* gen_new_int128_t(int128_t val);
-    _Gen* gen_new_double(double val); 
-    _Gen* gen_new_int_int(int a, int b); /* -> complex */
-    _Gen* gen_new_double_double(double a, double b); /* -> complex */
-    _Gen* gen_new_fraction(_Gen* num, _Gen* den);
-    _Gen* gen_new_c_string(char *cs, void *context_ptr);
+    _Gen* giac_new_int(int val);
+    _Gen* giac_new_int64_t(int64_t val);
+    _Gen* giac_new_int128_t(int128_t val);
+    _Gen* giac_new_bigint(void* m);
+    _Gen* giac_new_double(double val); 
+    _Gen* giac_new_bigint(void* m);
+    _Gen* giac_new_complex_int(int re, int im); 
+    _Gen* giac_new_complex_double(double re, double im); 
+    _Gen* giac_new_complex(_Gen* re, _Gen* im); 
+    _Gen* giac_new_rational(_Gen* num, _Gen* den);
+    _Gen* giac_new_symbolic(char *cs, void *context_ptr);
+    _Gen* giac_new_ident(char *cs);
 
-    void gen_delete(_Gen* g);
+    void giac_delete(_Gen* g);
 
-    char* gen_to_c_string(_Gen* g, void *context_ptr);
+    char* giac_to_c_string(_Gen* g, void *context_ptr);
 
-    _Gen* gen_op_plus(_Gen *a, _Gen *b);
-    _Gen* gen_op_minus(_Gen *a, _Gen *b);
-    _Gen* gen_op_times(_Gen *a, _Gen *b);
-    _Gen* gen_op_rdiv(_Gen *a, _Gen *b); /* rational division */
-    _Gen* gen_op_uminus(_Gen *a);
+    _Gen* giac_plus(_Gen *a, _Gen *b);
+    _Gen* giac_minus(_Gen *a, _Gen *b);
+    _Gen* giac_times(_Gen *a, _Gen *b);
+    _Gen* giac_rdiv(_Gen *a, _Gen *b); /* rational division */
+    _Gen* giac_uminus(_Gen *a);
+    _Gen* giac_pow(_Gen *a, _Gen *b, void *context_ptr);
+
+    _Gen* giac_real(_Gen* a, void *context_ptr);
+    _Gen* giac_imag(_Gen* a, void *context_ptr);
+    _Gen* giac_conj(_Gen* a, void *context_ptr);
+    _Gen* giac_abs(_Gen* a, void *context_ptr);
+
+    _Gen* giac_sqrt(_Gen* a, void *context_ptr);
+    _Gen* giac_exp(_Gen* a, void *context_ptr);
+    _Gen* giac_log(_Gen* a, void *context_ptr);
+    _Gen* giac_sin(_Gen* a, void *context_ptr);
+    _Gen* giac_cos(_Gen* a, void *context_ptr);
+    _Gen* giac_tan(_Gen* a, void *context_ptr);
+    _Gen* giac_sinh(_Gen* a, void *context_ptr);
+    _Gen* giac_cosh(_Gen* a, void *context_ptr);
+    _Gen* giac_tanh(_Gen* a, void *context_ptr);
+    _Gen* giac_asin(_Gen* a, void *context_ptr);
+    _Gen* giac_acos(_Gen* a, void *context_ptr);
+    _Gen* giac_atan(_Gen* a, void *context_ptr);
+    _Gen* giac_asinh(_Gen* a, void *context_ptr);
+    _Gen* giac_acosh(_Gen* a, void *context_ptr);
+    _Gen* giac_atanh(_Gen* a, void *context_ptr);
+    
+
+    _Gen* giac_eval(_Gen* g, int levels, void *context_ptr);
+    _Gen* giac_evalf(_Gen* g, int levels, void *context_ptr);
 
 #ifdef __cplusplus
 }

@@ -1,11 +1,12 @@
 all: shared_lib
 
-CFLAGS = #-g 
-CC = gcc-4.9 $(CFLAGS)
-CPP = g++-4.9 $(CFLAGS)
+CFLAGS = -g -DHAVE_CONFIG_H 
+CC = gcc $(CFLAGS)
+CPP = g++ $(CFLAGS)
 
-LIBDIR =
-INCDIR = -I /usr/include/giac
+
+LIBDIR = -L../lib
+INCDIR = -I../include/giac
 LIBS = -lgiac
 
 
@@ -35,6 +36,7 @@ giac_c.o: giac_c.C
 
 libgiac_c.$(SHLIB_EXT): $(OBJS)
 	$(CPP) $(OBJS) -rdynamic -shared -o $@ $(LIBDIR) $(LIBS)
+
 
 clean:
 	rm -f *.o *.$(SHLIB_EXT)        
