@@ -587,7 +587,6 @@ extern "C" {
         return reinterpret_cast<_Gen*>( r0 );
     }
 
-    char msg[] = "ERROR";    
 
     char* giac_to_string(_Gen* g, void *cp)
     {
@@ -599,7 +598,10 @@ extern "C" {
             cs = (char*) malloc(sizeof(char)*(s.length()+1));
             strcpy(cs, s.c_str());
         }
-        catch(runtime_error &e) { return msg; }
+        catch(runtime_error &e) { 
+            cerr << e.what() << endl;
+            return 0; 
+        }
         return cs;
     }
 
@@ -613,8 +615,26 @@ extern "C" {
             cs = (char*) malloc(sizeof(char)*(s.length()+1));
             strcpy(cs, s.c_str());
         }
-        catch(runtime_error &e) { return msg; }
+        catch(runtime_error &e) { 
+            cerr << e.what() << endl;
+            return 0; 
+        }
         return cs;
     }
+
+
+    _Gen* giac_integrate(_Gen* a, void *cp)
+    {
+        gen* r0;
+        try{
+            gen* a0 = reinterpret_cast<gen*>(a);
+            context* cp0 = reinterpret_cast<context*>(cp);
+            r0 = new gen();
+            *r0 = _integrate(*a0, cp0);
+        }   
+        catch(runtime_error &e) {return _error(e.what());}
+        return reinterpret_cast<_Gen*>(r0);
+    }
+
 
 }

@@ -1,6 +1,6 @@
 all: shared_lib
 
-CFLAGS = -g -DHAVE_CONFIG_H 
+CFLAGS = -O2 -DHAVE_CONFIG_H 
 CC = gcc $(CFLAGS)
 CPP = g++ $(CFLAGS)
 

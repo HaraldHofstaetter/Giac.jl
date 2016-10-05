@@ -11,6 +11,7 @@ import Base: asinh, acosh, atanh
 export @giac, giac, Gen, undef, giac_identifier
 export evaluate, evaluatef, value, evalf, simplify
 export simplify, latex, pretty_print
+export integrate
 
 
 
@@ -204,6 +205,7 @@ function _delete(g::Gen)
 end
 
 Gen(x) = undef
+Gen(x::Gen) = x
 
 function Gen(val::Cint)
     c = ccall(Libdl.dlsym(libgiac_c, "giac_new_int"), Ptr{Void}, (Cint,), val)
@@ -296,7 +298,9 @@ macro giac(x...)
     end
     for s in x
         @assert isa(s,Symbol) "@giac expected a list of symbols"
-        push!(q.args, Expr(:(=), s, Expr(:call, :giac_identifier, Expr(:quote, string(s)))))
+        push!(q.args, Expr(:(=), s, Expr(:call, :giac, Expr(:quote, string(s)))))
+        # Use here :giac (:giac_identifier should also work, but this leads to 
+        # strange behavior...
     end
     push!(q.args, Expr(:tuple, x...))
     eval(Main, q)
@@ -457,6 +461,16 @@ end
 function factor(a::Gen; with_sqrt::Bool=false)
    _gen(ccall(Libdl.dlsym(libgiac_c, "giac_factor"), Ptr{Void}, (Ptr{Void},Cint, Ptr{Void}), 
               a.g, with_sqrt?1:0, context_ptr))
+end   
+
+function integrate(ex::Gen, var::Gen)
+   _gen(ccall(Libdl.dlsym(libgiac_c, "giac_integrate"), Ptr{Void}, (Ptr{Void},Ptr{Void}), 
+              Gen([ex,var]).g, context_ptr))
+end   
+
+function integrate(ex::Gen, var::Gen, a::Union{Gen,Number}, b::Union{Gen,Number})
+   _gen(ccall(Libdl.dlsym(libgiac_c, "giac_integrate"), Ptr{Void}, (Ptr{Void},Ptr{Void}), 
+              Gen([ex,var,a,b]).g, context_ptr))
 end   
 
 
