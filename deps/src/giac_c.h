@@ -5,7 +5,7 @@ extern "C"
     struct _Gen;
     typedef struct _Gen _Gen;
 
-    void* get_context_ptr();
+    void* giac_context_ptr();
 
     _Gen* giac_new_int(int val);
     _Gen* giac_new_int64_t(int64_t val);
@@ -25,12 +25,17 @@ extern "C"
     char* giac_to_string(_Gen* g, void *context_ptr);
     char* giac_to_latex(_Gen* g, void *context_ptr);
 
+    _Gen* giac_undef(void);
+
     _Gen* giac_plus(_Gen *a, _Gen *b);
     _Gen* giac_minus(_Gen *a, _Gen *b);
     _Gen* giac_times(_Gen *a, _Gen *b);
     _Gen* giac_rdiv(_Gen *a, _Gen *b); /* rational division */
     _Gen* giac_uminus(_Gen *a);
     _Gen* giac_pow(_Gen *a, _Gen *b, void *context_ptr);
+
+    int giac_equal(_Gen *a, _Gen *b);
+    int giac_greater_than(_Gen *a, _Gen *b);
 
     _Gen* giac_real(_Gen* a, void *context_ptr);
     _Gen* giac_imag(_Gen* a, void *context_ptr);

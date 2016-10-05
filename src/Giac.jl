@@ -2,14 +2,15 @@ __precompile__()
 module Giac
 
 import Base: string, show, write, writemime, expand, factor
-import Base: +, -, (*), /, ^
+import Base: +, -, (*), /, ^, ==, >, <, >=, <=
 import Base: real, imag, conj, abs
 import Base: sqrt, exp, log, sin, cos, tan
 import Base: sinh, cosh, tanh, asin, acos, atan
 import Base: asinh, acosh, atanh
 
-export @giac, giac, Gen, evaluate, evaluatef, value, evalf, giac_identifier
-export simplify, latex
+export @giac, giac, Gen, undef, giac_identifier
+export evaluate, evaluatef, value, evalf, simplify
+export simplify, latex, pretty_print
 
 
 
@@ -17,11 +18,13 @@ function __init__()
     global libgiac
     global libgiac_c
     global context_ptr
+    global undef
     libgiac = Libdl.dlopen(joinpath(dirname(@__FILE__), "..", "deps", "lib",
                      string("libgiac.", Libdl.dlext)))
     libgiac_c = Libdl.dlopen(joinpath(dirname(@__FILE__), "..", "deps", "lib",
                      string("libgiac_c.", Libdl.dlext)))
-    context_ptr = ccall(Libdl.dlsym(libgiac_c, "get_context_ptr"), Ptr{Void}, () )                     
+    context_ptr = ccall(Libdl.dlsym(libgiac_c, "giac_context_ptr"), Ptr{Void}, () )
+    undef = _gen(ccall(Libdl.dlsym(libgiac_c, "giac_undef"), Ptr{Void}, () ))
 end
 
 
@@ -142,6 +145,8 @@ type Gen_FLOAT_ <: Gen
     g::Ptr{Void}
 end
 
+GenReal = Union{Gen_INT_,Gen_DOUBLE_,Gen_ZINT, Gen_REAL, Gen_FLOAT_}
+
 function _gen(g::Ptr{Void})
    t = unsafe_load(Ptr{UInt8}(g), 1) & 31
    if t==Int( _INT_ )
@@ -197,6 +202,8 @@ end
 function _delete(g::Gen)
     ccall( Libdl.dlsym(libgiac_c, "giac_delete"), Void, (Ptr{Void},), g.g)
 end
+
+Gen(x) = undef
 
 function Gen(val::Cint)
     c = ccall(Libdl.dlsym(libgiac_c, "giac_new_int"), Ptr{Void}, (Cint,), val)
@@ -322,10 +329,17 @@ function latex(g::Gen)
    s
 end
 
+
 show(io::IO, g::Gen) = print(io, string(g))
 
-writemime(io::IO, ::MIME"application/x-latex", ex::Gen) = write(io, "\$", latex(ex), "\$")
-writemime(io::IO, ::MIME"text/latex",  ex::Gen) = write(io, "\$", latex(ex), "\$")
+_pretty_print = false
+
+function pretty_print(flag::Bool=true)
+    global _pretty_print = flag
+end
+
+#writemime(io::IO, ::MIME"text/latex", ex::Gen) =  
+#    _pretty_print?write(io, "\$", latex(ex), "\$"):print(io, string(ex))
 
    
 function +(a::Gen, b::Gen)
@@ -362,6 +376,27 @@ end
 ^(a::Gen, b::Integer) = a^Gen(b)  # to ovverride ^(::Any, Integer) which is already defined
 ^(a::Gen, b::Number) = a^Gen(b)
 ^(a::Number, b::Gen) = Gen(a)^b
+
+function ==(a::Gen, b::Gen)
+   ccall(Libdl.dlsym(libgiac_c, "giac_equal"), Cint, (Ptr{Void},Ptr{Void}), a.g, b.g)!=0
+end   
+==(a::Gen, b::Number) = a==Gen(b)
+==(a::Number, b::Gen) = Gen(a)==b
+
+function >(a::GenReal, b::GenReal)
+   ccall(Libdl.dlsym(libgiac_c, "giac_greater_than"), Cint, (Ptr{Void},Ptr{Void}), a.g, b.g)!=0
+end   
+<(a::GenReal, b::GenReal) = b>a
+<=(a::GenReal, b::GenReal) = !(a>b)
+>=(a::GenReal, b::GenReal) = !(b>a)
+<=(a::GenReal, b::Real) = a<=Gen(b)
+<=(a::Real, b::GenReal) = Gen(a)<=b
+>=(a::GenReal, b::Real) = a>=Gen(b)
+>=(a::Real, b::GenReal) = Gen(a)>=b
+>(a::GenReal, b::Real) = a>Gen(b)
+<(a::Real, b::GenReal) = Gen(a)<b
+<(a::GenReal, b::Real) = a<Gen(b)
+>(a::Real, b::GenReal) = Gen(a)>b
 
 
 
@@ -400,7 +435,7 @@ function simplify(a::Gen)
    _gen(ccall(Libdl.dlsym(libgiac_c, "giac_simplify"), Ptr{Void}, (Ptr{Void},Ptr{Void}), a.g, context_ptr))
 end   
 
-evaluate(s::ASCIIString) = evaluate(Gen(s))
+simplify(s::ASCIIString) = simplify(Gen(s))
 
 function expand(a::Gen)
    _gen(ccall(Libdl.dlsym(libgiac_c, "giac_expand"), Ptr{Void}, (Ptr{Void},Ptr{Void}), a.g, context_ptr))

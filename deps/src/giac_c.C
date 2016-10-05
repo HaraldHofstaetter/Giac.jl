@@ -10,7 +10,7 @@ using namespace giac;
 
 extern "C" {
 
-    void* get_context_ptr()
+    void* giac_context_ptr()
     {
          return reinterpret_cast<void*>( new context() );
     }
@@ -90,7 +90,12 @@ extern "C" {
 
     void giac_delete(_Gen* g)
     {
-        delete reinterpret_cast<gen*>(g);
+        delete reinterpret_cast<const gen*>(g);
+    }
+
+    
+    _Gen* giac_undef(void) {
+        return reinterpret_cast<_Gen*>(const_cast<gen*>(&undef));
     }
 
     _Gen* giac_plus(_Gen *a, _Gen *b)
@@ -145,6 +150,20 @@ extern "C" {
         gen* r0 = new gen();
         *r0 = pow(*a0, *b0, cp0);
         return reinterpret_cast<_Gen*>(r0);
+    }
+
+    int giac_equal(_Gen *a, _Gen *b)
+    {
+        gen* a0 = reinterpret_cast<gen*>(a);
+        gen* b0 = reinterpret_cast<gen*>(b);
+        return (*a0)==(*b0)?1:0;
+    }
+
+    int giac_greater_than(_Gen *a, _Gen *b)
+    {
+        gen* a0 = reinterpret_cast<gen*>(a);
+        gen* b0 = reinterpret_cast<gen*>(b);
+        return (*a0)>(*b0)?1:0;
     }
 
     _Gen* giac_real(_Gen* a, void *cp)
