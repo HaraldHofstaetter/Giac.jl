@@ -320,6 +320,10 @@ function Gen{T}(v::Array{T,1})
     g
 end
 
+function Gen{T}(A::Array{T,2})
+    Gen([reshape(A[i,:], size(A,2)) for i in 1:size(A,1)])
+end    
+
 
 giac = Gen
 
