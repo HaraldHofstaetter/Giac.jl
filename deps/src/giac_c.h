@@ -67,6 +67,8 @@ extern "C"
     _Gen* giac_expand(_Gen* g, void *context_ptr);
     _Gen* giac_factor(_Gen* g, int with_sqrt, void *context_ptr);
 
+    _Gen* giac_integrate(_Gen* a, void *context_ptr);
+
 #ifdef __cplusplus
 }
 #endif
