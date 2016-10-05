@@ -87,6 +87,16 @@ extern "C" {
         return reinterpret_cast<_Gen*>(r0);
     }
 
+    _Gen* giac_new_vector(_Gen* v[], int len, short int subtype)
+    {
+        vecteur v0(len);
+        for (int i=0; i<len; i++) {
+            v0[i] = *(reinterpret_cast<gen*>(v[i]));
+        }
+        gen *r0 = new gen(v0, subtype);
+        return reinterpret_cast<_Gen*>(r0);
+    }
+
 
     void giac_delete(_Gen* g)
     {

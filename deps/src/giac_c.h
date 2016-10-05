@@ -20,6 +20,8 @@ extern "C"
     _Gen* giac_new_symbolic(char *cs, void *context_ptr);
     _Gen* giac_new_ident(char *cs);
 
+    _Gen* giac_new_vector(_Gen* v[], int len, short int subtype);
+
     void giac_delete(_Gen* g);
 
     char* giac_to_string(_Gen* g, void *context_ptr);

@@ -303,9 +303,18 @@ macro giac(x...)
 end
 
 
-
 function Gen(s::ASCIIString)
     c = ccall(Libdl.dlsym(libgiac_c, "giac_new_symbolic"), Ptr{Void}, (Ptr{UInt8},Ptr{Void}), s, context_ptr)
+    g = _gen(c)
+    finalizer(g, _delete)
+    g
+end
+
+function Gen{T}(v::Array{T,1})
+    v1 = Ptr{Void}[Gen(i).g for i in v]
+    c = ccall(Libdl.dlsym(libgiac_c, "giac_new_vector"), Ptr{Void}, 
+              (Ptr{Ptr{Void}},Cint,Cshort), 
+               v1, length(v1), 0)
     g = _gen(c)
     finalizer(g, _delete)
     g
