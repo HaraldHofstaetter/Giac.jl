@@ -26,13 +26,20 @@ else
 endif
 
 
-OBJS = giac_c.o
+OBJS = giac_c.o giac_funs.o
 
 shared_lib: libgiac_c.$(SHLIB_EXT)
 
 
 giac_c.o: giac_c.C
 	$(CPP) -fpic $(INCDIR)  -c $<
+
+giac_funs.C: gen_giac_funs.jl giac_funs.txt
+	julia  gen_giac_funs.jl > giac_funs.C
+
+giac_funs.o: giac_funs.C
+	$(CPP) -fpic $(INCDIR)  -c $<
+
 
 libgiac_c.$(SHLIB_EXT): $(OBJS)
 	$(CPP) $(OBJS) -rdynamic -shared -o $@ $(LIBDIR) $(LIBS)
