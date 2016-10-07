@@ -36,7 +36,7 @@ extern "C"
     _Gen* giac_uminus(_Gen *a);
     _Gen* giac_pow(_Gen *a, _Gen *b, void *context_ptr);
 
-    int giac_equal(_Gen *a, _Gen *b);
+    int giac_equal_bool(_Gen *a, _Gen *b);
     int giac_greater_than(_Gen *a, _Gen *b);
 
     _Gen* giac_real(_Gen* a, void *context_ptr);
@@ -68,6 +68,7 @@ extern "C"
     _Gen* giac_factor(_Gen* g, int with_sqrt, void *context_ptr);
 
     _Gen* giac_integrate(_Gen* a, void *context_ptr);
+    _Gen* giac_sum1(_Gen* ex, _Gen* x, _Gen* a, _Gen* b, void *context_ptr);
 
 #ifdef __cplusplus
 }

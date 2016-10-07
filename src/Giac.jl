@@ -1,31 +1,32 @@
 __precompile__()
 module Giac
 
-import Base: string, show, write, writemime, expand, factor
+import Base: string, show, write, writemime, expand, factor, collect 
+import Base: diff, sum
 import Base: +, -, (*), /, ^, ==, >, <, >=, <=
 import Base: real, imag, conj, abs
 import Base: sqrt, exp, log, sin, cos, tan
-import Base: sinh, cosh, tanh, asin, acos, atan
+import Base: sinh, cosh, tanh, asin, acos, atan, acot, acsc
 import Base: asinh, acosh, atanh
 
-export @giac, giac, Gen, undef, giac_identifier
+export @giac, giac, Gen, undef, infinity, giac_identifier
 export evaluate, evaluatef, value, evalf, simplify
 export simplify, latex, pretty_print
-export integrate
+
+export partfrac, subst, left, right, denom, numer
+export ⩦, equal
+export integrate, limit, series
 
 
 
 function __init__()
-    global libgiac
-    global libgiac_c
-    global context_ptr
-    global undef
-    libgiac = Libdl.dlopen(joinpath(dirname(@__FILE__), "..", "deps", "lib",
+    global const libgiac = Libdl.dlopen(joinpath(dirname(@__FILE__), "..", "deps", "lib",
                      string("libgiac.", Libdl.dlext)))
-    libgiac_c = Libdl.dlopen(joinpath(dirname(@__FILE__), "..", "deps", "lib",
+    global const libgiac_c = Libdl.dlopen(joinpath(dirname(@__FILE__), "..", "deps", "lib",
                      string("libgiac_c.", Libdl.dlext)))
-    context_ptr = ccall(Libdl.dlsym(libgiac_c, "giac_context_ptr"), Ptr{Void}, () )
-    undef = _gen(ccall(Libdl.dlsym(libgiac_c, "giac_undef"), Ptr{Void}, () ))
+    global const context_ptr = ccall(Libdl.dlsym(libgiac_c, "giac_context_ptr"), Ptr{Void}, () )
+    global const undef = _gen(ccall(Libdl.dlsym(libgiac_c, "giac_undef"), Ptr{Void}, () ))
+    global const infinity = giac("infinity")
 end
 
 
@@ -288,6 +289,14 @@ function giac_identifier(s::ASCIIString)
     g
 end
 
+function equation(left, right)
+    c = ccall(Libdl.dlsym(libgiac_c, "giac_new_equation"), Ptr{Void}, 
+              (Ptr{Void},Ptr{Void}), Gen(left).g, Gen(right).g)
+    g = _gen(c)
+    finalizer(g, _delete)
+    g
+end
+
 #This magic code stolen from SymPy, cf.
 #https://github.com/jverzani/SymPy.jl/blob/master/src/utils.jl
 macro giac(x...) 
@@ -395,7 +404,7 @@ end
 ^(a::Number, b::Gen) = Gen(a)^b
 
 function ==(a::Gen, b::Gen)
-   ccall(Libdl.dlsym(libgiac_c, "giac_equal"), Cint, (Ptr{Void},Ptr{Void}), a.g, b.g)!=0
+   ccall(Libdl.dlsym(libgiac_c, "giac_equal_bool"), Cint, (Ptr{Void},Ptr{Void}), a.g, b.g)!=0
 end   
 ==(a::Gen, b::Number) = a==Gen(b)
 ==(a::Number, b::Gen) = Gen(a)==b
@@ -463,15 +472,18 @@ function factor(a::Gen; with_sqrt::Bool=false)
               a.g, with_sqrt?1:0, context_ptr))
 end   
 
-function integrate(ex::Gen, var::Gen)
-   _gen(ccall(Libdl.dlsym(libgiac_c, "giac_integrate"), Ptr{Void}, (Ptr{Void},Ptr{Void}), 
-              Gen([ex,var]).g, context_ptr))
+function Base.sum(ex::Gen, x::Gen, a::Union{Gen,Number}, b::Union{Gen,Number})
+   _gen(ccall(Libdl.dlsym(libgiac_c, "giac_sum1"), Ptr{Void}, 
+    (Ptr{Void},Ptr{Void},Ptr{Void},Ptr{Void},Ptr{Void}), ex.g, x.g, Gen(a).g, Gen(b).g, context_ptr))
 end   
 
-function integrate(ex::Gen, var::Gen, a::Union{Gen,Number}, b::Union{Gen,Number})
-   _gen(ccall(Libdl.dlsym(libgiac_c, "giac_integrate"), Ptr{Void}, (Ptr{Void},Ptr{Void}), 
-              Gen([ex,var,a,b]).g, context_ptr))
+
+
+function Gen(f::Symbol, arg)
+   _gen(ccall(Libdl.dlsym(libgiac_c, string("giac_", f)), Ptr{Void}, (Ptr{Void},Ptr{Void}), Gen(arg).g, context_ptr))
 end   
+
+include("library.jl")
 
 
 value(g::Gen) = g
