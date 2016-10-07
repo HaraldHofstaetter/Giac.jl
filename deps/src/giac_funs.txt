@@ -326,7 +326,7 @@ expr
 extract_measure
 ezgcd
 faces
-#factor
+factor
 Factor
 factorial
 factors

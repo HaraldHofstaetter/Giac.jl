@@ -4,18 +4,21 @@ module Giac
 import Base: string, show, write, writemime, expand, factor, collect 
 import Base: diff, sum, zeros
 import Base: +, -, (*), /, ^, ==, >, <, >=, <=
-import Base: real, imag, conj, abs
+import Base: real, imag, conj, abs, sign
 import Base: sqrt, exp, log, sin, cos, tan
 import Base: sinh, cosh, tanh, asin, acos, atan, acot, acsc
 import Base: asinh, acosh, atanh
 
 export @giac, giac, Gen, undef, infinity, giac_identifier
 export evaluate, evaluatef, value, evalf, simplify
-export simplify, latex, pretty_print
+export simplify, plus_inf, minus_inf, latex, pretty_print
 
 export partfrac, subst, left, right, denom, numer
 export ⩦, equal
-export integrate, limit, series, solve, cSolve, cZeros 
+export integrate, limit, series, curl, grad, divergence, hessian
+export preval, sum_riemann, taylor
+export solve, cSolve, cZeros 
+export texpand
 
 
 
@@ -27,6 +30,8 @@ function __init__()
     global const context_ptr = ccall(Libdl.dlsym(libgiac_c, "giac_context_ptr"), Ptr{Void}, () )
     global const undef = _gen(ccall(Libdl.dlsym(libgiac_c, "giac_undef"), Ptr{Void}, () ))
     global const infinity = giac("infinity")
+    global const plus_inf = giac("plus_inf")
+    global const minus_inf = giac("minus_inf")
 end
 
 
@@ -199,6 +204,9 @@ function _gen(g::Ptr{Void})
    @assert false "unknown giac_type"
 end
 
+
+subtype(g::Gen) = unsafe_load(Ptr{UInt8}(g.g), 2) 
+
 function change_subtype(g::Gen, subtype::Integer)
     ccall( Libdl.dlsym(libgiac_c, "giac_change_subtype"), Void, (Ptr{Void},Cint), g.g, subtype)
 end
@@ -326,11 +334,11 @@ function Gen(s::ASCIIString)
     g
 end
 
-function Gen{T}(v::Array{T,1})
+function Gen{T}(v::Array{T,1}; subtype::Integer=0)
     v1 = Ptr{Void}[Gen(i).g for i in v]
     c = ccall(Libdl.dlsym(libgiac_c, "giac_new_vector"), Ptr{Void}, 
               (Ptr{Ptr{Void}},Cint,Cshort), 
-               v1, length(v1), 0)
+               v1, length(v1), subtype)
     g = _gen(c)
     finalizer(g, _delete)
     g
@@ -471,15 +479,9 @@ function expand(a::Gen)
 end   
 
 function factor(a::Gen; with_sqrt::Bool=false)
-   _gen(ccall(Libdl.dlsym(libgiac_c, "giac_factor"), Ptr{Void}, (Ptr{Void},Cint, Ptr{Void}), 
+   _gen(ccall(Libdl.dlsym(libgiac_c, "giac_factor1"), Ptr{Void}, (Ptr{Void},Cint, Ptr{Void}), 
               a.g, with_sqrt?1:0, context_ptr))
 end   
-
-function Base.sum(ex::Gen, x::Gen, a::Union{Gen,Number}, b::Union{Gen,Number})
-   _gen(ccall(Libdl.dlsym(libgiac_c, "giac_sum1"), Ptr{Void}, 
-    (Ptr{Void},Ptr{Void},Ptr{Void},Ptr{Void},Ptr{Void}), ex.g, x.g, Gen(a).g, Gen(b).g, context_ptr))
-end   
-
 
 
 function Gen(f::Symbol, arg)

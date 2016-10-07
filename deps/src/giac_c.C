@@ -596,7 +596,7 @@ extern "C" {
         return reinterpret_cast<_Gen*>( r0 );
     }
 
-    _Gen* giac_factor(_Gen* g, int with_sqrt, void *cp)
+    _Gen* giac_factor1(_Gen* g, int with_sqrt, void *cp)
     {
         gen* r0;
         try{
@@ -608,24 +608,6 @@ extern "C" {
         catch(runtime_error &e) {return _error(e.what());}
         return reinterpret_cast<_Gen*>( r0 );
     }
-
-
-    _Gen* giac_sum1(_Gen* ex, _Gen* x, _Gen* a, _Gen* b, void *cp)
-    {
-        gen* r0;
-        try{
-            gen* ex0 = reinterpret_cast<gen*>(ex);
-            gen* x0 = reinterpret_cast<gen*>(x);
-            gen* a0 = reinterpret_cast<gen*>(a);
-            gen* b0 = reinterpret_cast<gen*>(b);
-            context* cp0 = reinterpret_cast<context*>(cp);
-            r0 = new gen();
-            *r0 = sum(*ex0, *x0, *a0, *b0, cp0);
-        }   
-        catch(runtime_error &e) {return _error(e.what());}
-        return reinterpret_cast<_Gen*>(r0);
-    }
-
 
 
     char* giac_to_string(_Gen* g, void *cp)

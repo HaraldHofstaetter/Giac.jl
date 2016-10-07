@@ -36,6 +36,7 @@ extern "C"
     _Gen* giac_times(_Gen *a, _Gen *b);
     _Gen* giac_rdiv(_Gen *a, _Gen *b); /* rational division */
     _Gen* giac_uminus(_Gen *a);
+    _Gen* giac_uminus(_Gen *a);
     _Gen* giac_pow(_Gen *a, _Gen *b, void *context_ptr);
 
     int giac_equal_bool(_Gen *a, _Gen *b);
@@ -67,10 +68,9 @@ extern "C"
     _Gen* giac_evalf(_Gen* g, int levels, void *context_ptr);
     _Gen* giac_simplify(_Gen* g, void *context_ptr);
     _Gen* giac_expand(_Gen* g, void *context_ptr);
-    _Gen* giac_factor(_Gen* g, int with_sqrt, void *context_ptr);
+    _Gen* giac_factor1(_Gen* g, int with_sqrt, void *context_ptr);
 
     _Gen* giac_integrate(_Gen* a, void *context_ptr);
-    _Gen* giac_sum1(_Gen* ex, _Gen* x, _Gen* a, _Gen* b, void *context_ptr);
 
 #ifdef __cplusplus
 }
