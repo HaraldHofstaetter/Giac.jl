@@ -22,6 +22,8 @@ extern "C"
 
     _Gen* giac_new_vector(_Gen* v[], int len, short int subtype);
 
+    void giac_change_subtype(_Gen* g, int subtype);
+
     void giac_delete(_Gen* g);
 
     char* giac_to_string(_Gen* g, void *context_ptr);

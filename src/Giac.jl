@@ -2,7 +2,7 @@ __precompile__()
 module Giac
 
 import Base: string, show, write, writemime, expand, factor, collect 
-import Base: diff, sum
+import Base: diff, sum, zeros
 import Base: +, -, (*), /, ^, ==, >, <, >=, <=
 import Base: real, imag, conj, abs
 import Base: sqrt, exp, log, sin, cos, tan
@@ -15,7 +15,7 @@ export simplify, latex, pretty_print
 
 export partfrac, subst, left, right, denom, numer
 export ⩦, equal
-export integrate, limit, series
+export integrate, limit, series, solve, cSolve, cZeros 
 
 
 
@@ -199,6 +199,9 @@ function _gen(g::Ptr{Void})
    @assert false "unknown giac_type"
 end
 
+function change_subtype(g::Gen, subtype::Integer)
+    ccall( Libdl.dlsym(libgiac_c, "giac_change_subtype"), Void, (Ptr{Void},Cint), g.g, subtype)
+end
 
 
 function _delete(g::Gen)

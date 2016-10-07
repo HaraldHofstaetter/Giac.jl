@@ -182,6 +182,13 @@ extern "C" {
         return reinterpret_cast<_Gen*>(r0);
     }
 
+    void giac_change_subtype(_Gen* g, int subtype)
+    {
+        gen* g0 = reinterpret_cast<gen*>(g);
+        g0->change_subtype(subtype);
+    }
+
+
 
 
     void giac_delete(_Gen* g)
