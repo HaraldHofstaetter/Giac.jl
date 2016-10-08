@@ -463,23 +463,31 @@ macro giac(x...)
             push!(q.args, Expr(:(=), s, Expr(:call, :giac, Expr(:quote, string(s)))))
             # Use here :giac (:giac_identifier should also work, but this leads to 
             # strange behavior...
-            push!(r.args, s)
+            if length(x)>1
+                push!(r.args, s)
+            end    
         elseif isa(s, Expr)&&s.head==:(=)&&isa(s.args[1],Symbol)
             push!(q.args, Expr(:(=), s.args[1], Expr(:call, :giac, Expr(:quote, string(s.args[1])))))
             push!(q.args, Expr(:call, :store, s.args[2], s.args[1]))
-            push!(r.args, s.args[1])
+            if length(x)>1
+                push!(r.args, s.args[2])
+            end    
         elseif (isa(s, Expr)&&s.head==:(=)&&isa(s.args[1], Expr)
               &&s.args[1].head==:(call)&&isa(s.args[1].args[1], Symbol)
               &&isa(s.args[1].args[2], Symbol))
             push!(q.args, Expr(:(=), s.args[1].args[1], 
                  Expr(:call, :giac, Expr(:quote, string(s.args[1].args[1])))))
             push!(q.args, Expr(:call, :store, Expr(:call, :unapply, s.args[2], s.args[1].args[2]), s.args[1].args[1]))
-            push!(r.args, s.args[1].args[1])
+            if length(x)>1
+                push!(r.args, s.args[1].args[2])
+            end
         else
             @assert false "@giac expected a list of symbols or var=val expressions"
         end
     end
-    push!(q.args, r)
+    if length(x)>1
+        push!(q.args, r)
+    end    
     eval(Main, q)
 end
 
