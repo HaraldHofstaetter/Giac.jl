@@ -61,7 +61,11 @@ zeros(ex::Gen) = giac(:zeros, ex)
 zeros(exs, var) = giac(:zeros, giac(Any[exs, var], subtype=1))
 cZeros(eq::Gen) = giac(:cZeros, eq)
 cZeros(exs, var) = giac(:cZeros, giac(Any[exs, var], subtype=1))
-
+fSolve(eqs, vars, guess) = giac(:fsolve, giac(Any[eqs, vars, guess], subtype=1))
+fSolve(eqs, var_guess::Pair) = giac(:fsolve, giac(Any[eqs, var_guess[1], var_guess[2]], subtype=1))
+fSolve(eqs, vars) = giac(:fsolve, giac(Any[eqs, vars], subtype=1))
+fSolve(eqs) = giac(:fsolve, eqs)
+linsolve(eqs, vars) = giac(:linsolve, giac(Any[eqs, vars], subtype=1))
 
 texpand(ex) = giac(:texpand, ex)
 

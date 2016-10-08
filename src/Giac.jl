@@ -2,22 +2,22 @@ __precompile__()
 module Giac
 
 import Base: string, show, write, writemime, expand, factor, collect 
-import Base: diff, sum, zeros
+import Base: diff, sum, zeros, length, size, getindex, endof
 import Base: +, -, (*), /, ^, ==, >, <, >=, <=
 import Base: real, imag, conj, abs, sign
 import Base: sqrt, exp, log, sin, cos, tan
 import Base: sinh, cosh, tanh, asin, acos, atan, acot, acsc
 import Base: asinh, acosh, atanh
 
-export @giac, giac, Gen, undef, infinity, giac_identifier
-export evaluate, evaluatef, value, evalf, simplify
+export @giac, giac, Gen, undef, infinity, giac_identifier, to_julia
+export evaluate, evaluatef, evalf, simplify
 export simplify, plus_inf, minus_inf, latex, pretty_print
 
 export partfrac, subst, left, right, denom, numer
 export ⩦, equal
 export integrate, limit, series, curl, grad, divergence, hessian
 export preval, sum_riemann, taylor
-export solve, cSolve, cZeros 
+export solve, cSolve, cZeros, fSolve, linsolve 
 export texpand
 
 
@@ -153,6 +153,7 @@ type Gen_FLOAT_ <: Gen
 end
 
 GenReal = Union{Gen_INT_,Gen_DOUBLE_,Gen_ZINT, Gen_REAL, Gen_FLOAT_}
+GenNumber = Union{Gen_INT_,Gen_DOUBLE_,Gen_ZINT, Gen_REAL, Gen_FLOAT_, Gen_CPLX}
 
 function _gen(g::Ptr{Void})
    t = unsafe_load(Ptr{UInt8}(g), 1) & 31
@@ -220,7 +221,10 @@ function _delete(g::Gen)
 end
 
 Gen(x) = undef
-Gen(x::Gen) = x
+
+function Gen(g::Gen)
+   _gen(ccall(Libdl.dlsym(libgiac_c, "giac_copy_gen"), Ptr{Void}, (Ptr{Void},), g.g))
+end   
 
 function Gen(val::Cint)
     _gen(ccall(Libdl.dlsym(libgiac_c, "giac_new_int"), Ptr{Void}, (Cint,), val))
@@ -333,7 +337,7 @@ function pretty_print(flag::Bool=true)
 end
 
 #writemime(io::IO, ::MIME"text/latex", ex::Gen) =  
-#    _pretty_print?write(io, "\$", latex(ex), "\$"):print(io, string(ex))
+#    _pretty_print?write(io, "\$\$", latex(ex), "\$\$"):print(io, string(ex))
 
    
 function +(a::Gen, b::Gen)
@@ -393,6 +397,17 @@ end
 >(a::Real, b::GenReal) = Gen(a)>b
 
 
+function size(g::Gen)
+   ccall(Libdl.dlsym(libgiac_c, "giac_size1"), Cint, (Ptr{Void},), g.g)
+end
+
+length(g::Gen) = size(g) # 
+
+function getindex(g::Gen_VECT, i)
+   _gen(ccall(Libdl.dlsym(libgiac_c, "giac_getindex"), Ptr{Void}, (Ptr{Void},Cint), g.g, i-1))
+end
+
+endof(g::Gen_VECT) = size(g)
 
 # unary functions with context_ptr:
 for F in (:real, :imag, :conj, :abs,
@@ -448,6 +463,35 @@ end
 include("library.jl")
 
 
-value(g::Gen) = g
+
+to_julia(g::Gen) = Gen(g)
+
+to_julia(g::Gen_INT_) =
+    ccall(Libdl.dlsym(libgiac_c, "giac_get_int"), Cint, (Ptr{Void},), g.g)
+
+to_julia(g::Union{Gen_DOUBLE_, Gen_FLOAT_}) = 
+    ccall(Libdl.dlsym(libgiac_c, "giac_get_double"), Cdouble, (Ptr{Void},), g.g)
+
+function to_julia(g::Gen_ZINT)
+    z = BigInt()
+    m = ccall(Libdl.dlsym(libgiac_c, "giac_get_bigint"), Ptr{BigInt}, (Ptr{Void},), g.g)
+    ccall((:__gmpz_set,:libgmp), Void, (Ptr{BigInt}, Ptr{BigInt}), &z, m)
+    z
+end
+
+const _ROUNDING_MODE = Ref{Cint}(0)
+function to_julia(g::Gen_REAL)
+    z = BigFloat()
+    m = ccall(Libdl.dlsym(libgiac_c, "giac_get_bigfloat"), Ptr{BigFloat}, (Ptr{Void},), g.g)
+    ccall((:mpfr_set, :libmpfr), Int32, (Ptr{BigFloat}, Ptr{BigFloat}, Int32),
+          &z, m, _ROUNDING_MODE[])
+    z      
+end
+
+to_julia(g::Gen_CPLX) = complex(to_julia(real(g)), to_julia(imag(g))) 
+
+to_julia(g::Gen_FRAC) = to_julia(numer(g))//to_julia(denom(g))
+
+to_julia(g::Gen_VECT) = [to_julia(g[i]) for i=1:length(g)]
 
 end # module

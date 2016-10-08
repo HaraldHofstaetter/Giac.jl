@@ -7,18 +7,25 @@ extern "C"
 
     void* giac_context_ptr();
 
+    _Gen* giac_copy_gen(_Gen* g);
     _Gen* giac_new_int(int val);
     _Gen* giac_new_int64_t(int64_t val);
     _Gen* giac_new_int128_t(int128_t val);
     _Gen* giac_new_bigint(void* m);
     _Gen* giac_new_double(double val); 
-    _Gen* giac_new_bigint(void* m);
+    _Gen* giac_new_bigfloat(void* m);
     _Gen* giac_new_complex_int(int re, int im); 
     _Gen* giac_new_complex_double(double re, double im); 
     _Gen* giac_new_complex(_Gen* re, _Gen* im); 
     _Gen* giac_new_rational(_Gen* num, _Gen* den);
     _Gen* giac_new_symbolic(char *cs, void *context_ptr);
     _Gen* giac_new_ident(char *cs);
+
+    int giac_get_int(_Gen* g);
+    double giac_get_double(_Gen* g);
+    void* giac_get_bigint(_Gen* g);
+    void* giac_get_bigfloat(_Gen* g);
+
 
     _Gen* giac_new_vector(_Gen* v[], int len, short int subtype);
 
@@ -41,6 +48,9 @@ extern "C"
 
     int giac_equal_bool(_Gen *a, _Gen *b);
     int giac_greater_than(_Gen *a, _Gen *b);
+    int giac_size1(_Gen *g);
+
+    _Gen* giac_getindex(_Gen* a, int i);
 
     _Gen* giac_real(_Gen* a, void *context_ptr);
     _Gen* giac_imag(_Gen* a, void *context_ptr);
