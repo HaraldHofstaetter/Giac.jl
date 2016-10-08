@@ -157,51 +157,54 @@ GenReal = Union{Gen_INT_,Gen_DOUBLE_,Gen_ZINT, Gen_REAL, Gen_FLOAT_}
 function _gen(g::Ptr{Void})
    t = unsafe_load(Ptr{UInt8}(g), 1) & 31
    if t==Int( _INT_ )
-       return Gen_INT_(g)
+       gg = Gen_INT_(g)
    elseif t==Int( _DOUBLE_ )   
-       return Gen_DOUBLE_(g)
+       gg = Gen_DOUBLE_(g)
    elseif t==Int( _ZINT )
-       return Gen_ZINT(g)
+       gg = Gen_ZINT(g)
    elseif t==Int( _REAL )
-       return Gen_REAL(g)
+       gg = Gen_REAL(g)
    elseif t==Int( _CPLX )
-       return Gen_CPLX(g)
+       gg = Gen_CPLX(g)
    elseif t==Int( _POLY )
-       return Gen_POLY(g)
+       gg = Gen_POLY(g)
    elseif t==Int( _IDNT )
-       return Gen_IDNT(g)
+       gg = Gen_IDNT(g)
    elseif t==Int( _VECT )
-       return Gen_VECT(g)
+       gg = Gen_VECT(g)
    elseif t==Int( _SYMB )
-       return Gen_SYMB(g)
+       gg = Gen_SYMB(g)
    elseif t==Int( _SPOL1 )
-       return Gen_SPOL1(g)
+       gg = Gen_SPOL1(g)
    elseif t==Int( _FRAC )
-       return Gen_FRAC(g)
+       gg = Gen_FRAC(g)
    elseif t==Int( _EXT )
-       return Gen_EXT(g)
+       gg = Gen_EXT(g)
    elseif t==Int( _STRNG )
-       return Gen_STRNG(g)
+       gg = Gen_STRNG(g)
    elseif t==Int( _FUNC )
-       return Gen_FUNC(g)
+       gg = Gen_FUNC(g)
    elseif t==Int( _ROOT )
-       return Gen_ROOT(g)
+       gg = Gen_ROOT(g)
    elseif t==Int( _MOD )
-       return Gen_MOD(g)
+       gg = Gen_MOD(g)
    elseif t==Int( _USER )
-       return Gen_USER(g)
+       gg = Gen_USER(g)
    elseif t==Int( _MAP )
-       return Gen_MAP(g)
+       gg = Gen_MAP(g)
    elseif t==Int( _EQW )
-       return Gen_EQW(g)
+       gg = Gen_EQW(g)
    elseif t==Int( _GROB )
-       return Gen_GROB(g)
+       gg = Gen_GROB(g)
    elseif t==Int( _POINTER )
-       return Gen_POINTER(g)
+       gg = Gen_POINTER(g)
    elseif t==Int( _FLOAT_ )
-       return Gen_FLOAT_(g)
+       gg = Gen_FLOAT_(g)
+   else    
+       @assert false "unknown giac_type"
    end
-   @assert false "unknown giac_type"
+   finalizer(gg, _delete)
+   gg
 end
 
 
@@ -220,93 +223,53 @@ Gen(x) = undef
 Gen(x::Gen) = x
 
 function Gen(val::Cint)
-    c = ccall(Libdl.dlsym(libgiac_c, "giac_new_int"), Ptr{Void}, (Cint,), val)
-    g = _gen(c)
-    finalizer(g, _delete)
-    g
+    _gen(ccall(Libdl.dlsym(libgiac_c, "giac_new_int"), Ptr{Void}, (Cint,), val))
 end
 
 function Gen(val::Int64)
-    c = ccall(Libdl.dlsym(libgiac_c, "giac_new_int64_t"), Ptr{Void}, (Int64,), val)
-    g = _gen(c)
-    finalizer(g, _delete)
-    g
+    _gen(ccall(Libdl.dlsym(libgiac_c, "giac_new_int64_t"), Ptr{Void}, (Int64,), val))
 end
 
 function Gen(val::BigInt)
-    c = ccall(Libdl.dlsym(libgiac_c, "giac_new_bigint"), Ptr{Void}, (Ptr{BigInt},), &val)
-    g = _gen(c)
-    finalizer(g, _delete)
-    g
+    _gen(ccall(Libdl.dlsym(libgiac_c, "giac_new_bigint"), Ptr{Void}, (Ptr{BigInt},), &val))
 end
 
 function Gen(val::Rational)
-    c = ccall(Libdl.dlsym(libgiac_c, "giac_new_rational"), Ptr{Void}, (Ptr{Void},Ptr{Void}), Gen(val.num).g, Gen(val.den).g)
-    g = _gen(c)
-    finalizer(g, _delete)
-    g
+    _gen(ccall(Libdl.dlsym(libgiac_c, "giac_new_rational"), Ptr{Void}, (Ptr{Void},Ptr{Void}), Gen(val.num).g, Gen(val.den).g))
 end
 
 #does not seem to work properly
 #function Gen(val::Int128)
-#    c = ccall(Libdl.dlsym(libgiac_c, "giac_new_int128_t"), Ptr{Void}, (Int128,), val)
-#    g = _gen(c)
-#    finalizer(g, _delete)
-#    g
+#    _gen(ccall(Libdl.dlsym(libgiac_c, "giac_new_int128_t"), Ptr{Void}, (Int128,), val))
 #end
 
 function Gen(val::Cdouble)
-    c = ccall(Libdl.dlsym(libgiac_c, "giac_new_double"), Ptr{Void}, (Cdouble,), val)
-    g = _gen(c)
-    finalizer(g, _delete)
-    g
+    _gen(ccall(Libdl.dlsym(libgiac_c, "giac_new_double"), Ptr{Void}, (Cdouble,), val))
 end
 
 function Gen(val::BigFloat)
-    c = ccall(Libdl.dlsym(libgiac_c, "giac_new_bigfloat"), Ptr{Void}, (Ptr{BigFloat},), &val)
-    g = _gen(c)
-    finalizer(g, _delete)
-    g
+    _gen(ccall(Libdl.dlsym(libgiac_c, "giac_new_bigfloat"), Ptr{Void}, (Ptr{BigFloat},), &val))
 end
 
 
 function Gen(val::Complex)
-    c = ccall(Libdl.dlsym(libgiac_c, "giac_new_complex"), Ptr{Void}, (Ptr{Void},Ptr{Void}), Gen(real(val)).g, Gen(imag(val)).g)
-    g = _gen(c)
-    finalizer(g, _delete)
-    g
+    _gen(ccall(Libdl.dlsym(libgiac_c, "giac_new_complex"), Ptr{Void}, (Ptr{Void},Ptr{Void}), Gen(real(val)).g, Gen(imag(val)).g))
 end
 
 
 function Gen(val::Complex{Cint})  
-    c = ccall(Libdl.dlsym(libgiac_c, "giac_new_complex_int"), Ptr{Void}, (Cint, Cint), real(val), real(val))
-    g = _gen(c)
-    finalizer(g, _delete)
-    g
+    _gen(ccall(Libdl.dlsym(libgiac_c, "giac_new_complex_int"), Ptr{Void}, (Cint, Cint), real(val), real(val)))
 end
 
 
 function Gen(val::Complex{Cdouble})  
-    c = ccall(Libdl.dlsym(libgiac_c, "giac_new_complex_double"), Ptr{Void}, (Cdouble, Cdouble), real(val), real(val))
-    g = _gen(c)
-    finalizer(g, _delete)
-    g
+    _gen(ccall(Libdl.dlsym(libgiac_c, "giac_new_complex_double"), Ptr{Void}, (Cdouble, Cdouble), real(val), real(val)))
 end
 
 function giac_identifier(s::ASCIIString)
-    c = ccall(Libdl.dlsym(libgiac_c, "giac_new_ident"), Ptr{Void}, (Ptr{UInt8},), s)
-    g = _gen(c)
-    finalizer(g, _delete)
-    g
+    _gen(ccall(Libdl.dlsym(libgiac_c, "giac_new_ident"), Ptr{Void}, (Ptr{UInt8},), s))
 end
 
-function equation(left, right)
-    c = ccall(Libdl.dlsym(libgiac_c, "giac_new_equation"), Ptr{Void}, 
-              (Ptr{Void},Ptr{Void}), Gen(left).g, Gen(right).g)
-    g = _gen(c)
-    finalizer(g, _delete)
-    g
-end
 
 #This magic code stolen from SymPy, cf.
 #https://github.com/jverzani/SymPy.jl/blob/master/src/utils.jl
@@ -328,20 +291,14 @@ end
 
 
 function Gen(s::ASCIIString)
-    c = ccall(Libdl.dlsym(libgiac_c, "giac_new_symbolic"), Ptr{Void}, (Ptr{UInt8},Ptr{Void}), s, context_ptr)
-    g = _gen(c)
-    finalizer(g, _delete)
-    g
+    _gen(ccall(Libdl.dlsym(libgiac_c, "giac_new_symbolic"), Ptr{Void}, (Ptr{UInt8},Ptr{Void}), s, context_ptr))
 end
 
 function Gen{T}(v::Array{T,1}; subtype::Integer=0)
     v1 = Ptr{Void}[Gen(i).g for i in v]
-    c = ccall(Libdl.dlsym(libgiac_c, "giac_new_vector"), Ptr{Void}, 
+    _gen(ccall(Libdl.dlsym(libgiac_c, "giac_new_vector"), Ptr{Void}, 
               (Ptr{Ptr{Void}},Cint,Cshort), 
-               v1, length(v1), subtype)
-    g = _gen(c)
-    finalizer(g, _delete)
-    g
+               v1, length(v1), subtype))
 end
 
 function Gen{T}(A::Array{T,2})

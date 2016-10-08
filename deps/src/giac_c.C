@@ -168,19 +168,6 @@ extern "C" {
         return reinterpret_cast<_Gen*>(r0);
     }
 
-    _Gen* giac_new_equation(void *left, void *right)
-    {
-        gen *r0;
-        try{
-            gen* left0 = reinterpret_cast<gen*>(left);
-            gen* right0 = reinterpret_cast<gen*>(right);
-
-
-
-        }
-        catch(runtime_error &e) {return _error(e.what());}
-        return reinterpret_cast<_Gen*>(r0);
-    }
 
     void giac_change_subtype(_Gen* g, int subtype)
     {
