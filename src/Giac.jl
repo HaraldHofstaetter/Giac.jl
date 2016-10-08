@@ -9,8 +9,8 @@ import Base: sqrt, exp, log, sin, cos, tan
 import Base: sinh, cosh, tanh, asin, acos, atan, acot, acsc
 import Base: asinh, acosh, atanh
 
-export @giac, giac, Gen, undef, infinity, giac_identifier, to_julia
-export evaluate, evaluatef, evalf, simplify
+export @giac, giac, Gen, undef, infinity, giac_identifier
+export evaluate, evaluatef, evalf, simplify, to_julia, store, giac_vars
 export simplify, plus_inf, minus_inf, latex, pretty_print
 
 export partfrac, subst, left, right, denom, numer
@@ -275,25 +275,6 @@ function giac_identifier(s::ASCIIString)
 end
 
 
-#This magic code stolen from SymPy, cf.
-#https://github.com/jverzani/SymPy.jl/blob/master/src/utils.jl
-macro giac(x...) 
-    q=Expr(:block)
-    if length(x) == 1 && isa(x[1],Expr)
-        @assert x[1].head === :tuple "@giac expected a list of symbols"
-        x = x[1].args
-    end
-    for s in x
-        @assert isa(s,Symbol) "@giac expected a list of symbols"
-        push!(q.args, Expr(:(=), s, Expr(:call, :giac, Expr(:quote, string(s)))))
-        # Use here :giac (:giac_identifier should also work, but this leads to 
-        # strange behavior...
-    end
-    push!(q.args, Expr(:tuple, x...))
-    eval(Main, q)
-end
-
-
 function Gen(s::ASCIIString)
     _gen(ccall(Libdl.dlsym(libgiac_c, "giac_new_symbolic"), Ptr{Void}, (Ptr{UInt8},Ptr{Void}), s, context_ptr))
 end
@@ -421,12 +402,6 @@ for F in (:real, :imag, :conj, :abs,
    end
 end
 
-
-
-
-
-
-
 function evaluate(a::Gen; levels=10)
    _gen(ccall(Libdl.dlsym(libgiac_c, "giac_eval"), Ptr{Void}, (Ptr{Void},Cint,Ptr{Void}), a.g, levels, context_ptr))
 end   
@@ -463,6 +438,36 @@ end
 include("library.jl")
 
 
+store(val, var) = giac(:sto, [val, var])
+giac_vars() = [Pair(left(x), right(x)) for x in to_julia(giac(:VARS, 1))] 
+
+#This magic code inspired by SymPy, cf.
+#https://github.com/jverzani/SymPy.jl/blob/master/src/utils.jl
+macro giac(x...) 
+    q=Expr(:block)
+    r=Expr(:tuple)
+    if length(x) == 1 && isa(x[1],Expr)
+        if (x[1].head === :tuple)
+            x = x[1].args
+        end    
+    end
+    for s in x
+        @assert isa(s,Symbol)||(isa(s, Expr)&&s.head==:(=)&&isa(s.args[1],Symbol)) "@giac expected a list of symbols or var=val expressions"
+        if isa(s,Symbol)
+            push!(q.args, Expr(:(=), s, Expr(:call, :giac, Expr(:quote, string(s)))))
+            # Use here :giac (:giac_identifier should also work, but this leads to 
+            # strange behavior...
+            push!(r.args, s)
+        else
+            push!(q.args, Expr(:(=), s.args[1], Expr(:call, :giac, Expr(:quote, string(s.args[1])))))
+            push!(q.args, Expr(:call, :store, s.args[2], s.args[1]))
+            push!(r.args, s.args[1])
+        end
+    end
+    push!(q.args, r)
+    eval(Main, q)
+end
+
 
 to_julia(g::Gen) = Gen(g)
 
@@ -479,12 +484,11 @@ function to_julia(g::Gen_ZINT)
     z
 end
 
-const _ROUNDING_MODE = Ref{Cint}(0)
 function to_julia(g::Gen_REAL)
     z = BigFloat()
     m = ccall(Libdl.dlsym(libgiac_c, "giac_get_bigfloat"), Ptr{BigFloat}, (Ptr{Void},), g.g)
     ccall((:mpfr_set, :libmpfr), Int32, (Ptr{BigFloat}, Ptr{BigFloat}, Int32),
-          &z, m, _ROUNDING_MODE[])
+          &z, m, 0)
     z      
 end
 
