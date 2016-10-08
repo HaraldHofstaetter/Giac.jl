@@ -393,6 +393,12 @@ function call(g::Gen, x)
        (Ptr{Void},Ptr{Void},Ptr{Void}), g.g, Gen(x).g, context_ptr))
 end
 
+function call(g::Gen, x...)
+    _gen(ccall(Libdl.dlsym(Giac.libgiac_c, "giac_call"), Ptr{Void}, 
+        (Ptr{Void},Ptr{Void},Ptr{Void}), g.g, Gen([x...],subtype=1).g, context_ptr))
+end
+
+
 
 endof(g::Gen_VECT) = size(g)
 
@@ -444,7 +450,7 @@ end
 include("library.jl")
 
 
-unapply(ex,var) = giac(:unapply, [ex, var])
+unapply(ex,var) = giac(:unapply, giac(Any[ex, var], subtype=1))
 store(val, var) = giac(:sto, [val, var])
 giac_vars() = [Pair(left(x), right(x)) for x in to_julia(giac(:VARS, 1))] 
 
@@ -467,17 +473,23 @@ macro giac(x...)
                 push!(r.args, s)
             end    
         elseif isa(s, Expr)&&s.head==:(=)&&isa(s.args[1],Symbol)
-            push!(q.args, Expr(:(=), s.args[1], Expr(:call, :giac, Expr(:quote, string(s.args[1])))))
+            push!(q.args, Expr(:(=), s.args[1], Expr(:call, :giac, 
+                  Expr(:quote, string(s.args[1])))))
             push!(q.args, Expr(:call, :store, s.args[2], s.args[1]))
             if length(x)>1
                 push!(r.args, s.args[2])
             end    
         elseif (isa(s, Expr)&&s.head==:(=)&&isa(s.args[1], Expr)
-              &&s.args[1].head==:(call)&&isa(s.args[1].args[1], Symbol)
-              &&isa(s.args[1].args[2], Symbol))
+              &&s.args[1].head==:(call)&&isa(s.args[1].args[1], Symbol))
             push!(q.args, Expr(:(=), s.args[1].args[1], 
                  Expr(:call, :giac, Expr(:quote, string(s.args[1].args[1])))))
-            push!(q.args, Expr(:call, :store, Expr(:call, :unapply, s.args[2], s.args[1].args[2]), s.args[1].args[1]))
+            if length(s.args[1].args)>2
+                push!(q.args, Expr(:call, :store, Expr(:call, :unapply, s.args[2], 
+                      Expr(:vect, s.args[1].args[2:end]...)), s.args[1].args[1]))
+            else
+                push!(q.args, Expr(:call, :store, Expr(:call, :unapply, s.args[2], 
+                      s.args[1].args[2]), s.args[1].args[1]))
+            end
             if length(x)>1
                 push!(r.args, s.args[1].args[2])
             end
