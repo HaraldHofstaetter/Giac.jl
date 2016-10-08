@@ -370,6 +370,21 @@ extern "C" {
         return reinterpret_cast<_Gen*>(r0);
     }
 
+    _Gen* giac_call(_Gen* f, _Gen* x, void *cp)
+    {
+        gen* r0;
+        try{
+            gen* f0 = reinterpret_cast<gen*>(f);
+            gen* x0 = reinterpret_cast<gen*>(x);
+            context* cp0 = reinterpret_cast<context*>(cp);
+            r0 = new gen();
+            *r0 = (*f0)(*x0, cp0);
+        }   
+        catch(runtime_error &e) {return _error(e.what());}
+        return reinterpret_cast<_Gen*>(r0);
+    }
+    
+
     _Gen* giac_real(_Gen* a, void *cp)
     {
         gen* r0;

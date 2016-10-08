@@ -2,7 +2,7 @@ __precompile__()
 module Giac
 
 import Base: string, show, write, writemime, expand, factor, collect 
-import Base: diff, sum, zeros, length, size, getindex, endof
+import Base: diff, sum, zeros, length, size, getindex, endof, call
 import Base: +, -, (*), /, ^, ==, >, <, >=, <=
 import Base: real, imag, conj, abs, sign
 import Base: sqrt, exp, log, sin, cos, tan
@@ -11,7 +11,7 @@ import Base: asinh, acosh, atanh
 
 export @giac, giac, Gen, undef, infinity, giac_identifier
 export evaluate, evaluatef, evalf, simplify, to_julia, store, giac_vars
-export simplify, plus_inf, minus_inf, latex, pretty_print
+export unapply, simplify, plus_inf, minus_inf, latex, pretty_print
 
 export partfrac, subst, left, right, denom, numer
 export ⩦, equal
@@ -388,6 +388,12 @@ function getindex(g::Gen_VECT, i)
    _gen(ccall(Libdl.dlsym(libgiac_c, "giac_getindex"), Ptr{Void}, (Ptr{Void},Cint), g.g, i-1))
 end
 
+function call(g::Gen, x)
+   _gen(ccall(Libdl.dlsym(libgiac_c, "giac_call"), Ptr{Void}, 
+       (Ptr{Void},Ptr{Void},Ptr{Void}), g.g, Gen(x).g, context_ptr))
+end
+
+
 endof(g::Gen_VECT) = size(g)
 
 # unary functions with context_ptr:
@@ -438,6 +444,7 @@ end
 include("library.jl")
 
 
+unapply(ex,var) = giac(:unapply, [ex, var])
 store(val, var) = giac(:sto, [val, var])
 giac_vars() = [Pair(left(x), right(x)) for x in to_julia(giac(:VARS, 1))] 
 
@@ -452,16 +459,24 @@ macro giac(x...)
         end    
     end
     for s in x
-        @assert isa(s,Symbol)||(isa(s, Expr)&&s.head==:(=)&&isa(s.args[1],Symbol)) "@giac expected a list of symbols or var=val expressions"
         if isa(s,Symbol)
             push!(q.args, Expr(:(=), s, Expr(:call, :giac, Expr(:quote, string(s)))))
             # Use here :giac (:giac_identifier should also work, but this leads to 
             # strange behavior...
             push!(r.args, s)
-        else
+        elseif isa(s, Expr)&&s.head==:(=)&&isa(s.args[1],Symbol)
             push!(q.args, Expr(:(=), s.args[1], Expr(:call, :giac, Expr(:quote, string(s.args[1])))))
             push!(q.args, Expr(:call, :store, s.args[2], s.args[1]))
             push!(r.args, s.args[1])
+        elseif (isa(s, Expr)&&s.head==:(=)&&isa(s.args[1], Expr)
+              &&s.args[1].head==:(call)&&isa(s.args[1].args[1], Symbol)
+              &&isa(s.args[1].args[2], Symbol))
+            push!(q.args, Expr(:(=), s.args[1].args[1], 
+                 Expr(:call, :giac, Expr(:quote, string(s.args[1].args[1])))))
+            push!(q.args, Expr(:call, :store, Expr(:call, :unapply, s.args[2], s.args[1].args[2]), s.args[1].args[1]))
+            push!(r.args, s.args[1].args[1])
+        else
+            @assert false "@giac expected a list of symbols or var=val expressions"
         end
     end
     push!(q.args, r)

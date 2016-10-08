@@ -26,7 +26,6 @@ extern "C"
     void* giac_get_bigint(_Gen* g);
     void* giac_get_bigfloat(_Gen* g);
 
-
     _Gen* giac_new_vector(_Gen* v[], int len, short int subtype);
 
     void giac_change_subtype(_Gen* g, int subtype);
@@ -51,6 +50,7 @@ extern "C"
     int giac_size1(_Gen *g);
 
     _Gen* giac_getindex(_Gen* a, int i);
+    _Gen* giac_call(_Gen* f, _Gen* x, void *context_ptr);
 
     _Gen* giac_real(_Gen* a, void *context_ptr);
     _Gen* giac_imag(_Gen* a, void *context_ptr);
