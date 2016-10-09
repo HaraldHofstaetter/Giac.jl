@@ -66,6 +66,8 @@ fSolve(eqs, vars, guess) = giac(:fsolve, giac(Any[eqs, vars, guess], subtype=1))
 fSolve(eqs, var_guess::Pair) = giac(:fsolve, giac(Any[eqs, var_guess[1], var_guess[2]], subtype=1))
 fSolve(eqs, vars) = giac(:fsolve, giac(Any[eqs, vars], subtype=1))
 fSolve(eqs) = giac(:fsolve, eqs)
+deSolve(eq, var) = giac(:desolve, giac(Any[eq, var], subtype=1))
+deSolve(eq, timevar, var) = giac(:desolve, giac(Any[eq, timevar, var], subtype=1))
 linsolve(eqs, vars) = giac(:linsolve, giac(Any[eqs, vars], subtype=1))
 
 texpand(ex) = giac(:texpand, ex)

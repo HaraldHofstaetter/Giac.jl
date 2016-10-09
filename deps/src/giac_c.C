@@ -250,7 +250,7 @@ extern "C" {
 
     
     _Gen* giac_undef(void) {
-        return reinterpret_cast<_Gen*>(const_cast<gen*>(&undef));
+        return reinterpret_cast<_Gen*>(new gen(undef));
     }
 
     _Gen* giac_plus(_Gen *a, _Gen *b)

@@ -10,14 +10,14 @@ import Base: sinh, cosh, tanh, asin, acos, atan, acot, acsc
 import Base: asinh, acosh, atanh
 
 export @giac, giac, Gen, undef, infinity, giac_identifier
-export evaluate, evaluatef, evalf, simplify, to_julia, store, giac_vars
+export evaluate, evaluatef, evalf, simplify, to_julia, store, purge, giac_vars
 export unapply, simplify, plus_inf, minus_inf, latex, pretty_print
 
 export partfrac, subst, left, right, denom, numer
 export ⩦, equal
 export integrate, limit, series, curl, grad, divergence, hessian
 export preval, sum_riemann, taylor
-export solve, cSolve, cZeros, fSolve, linsolve 
+export solve, cSolve, cZeros, fSolve, deSolve, linsolve 
 export texpand
 
 
@@ -32,6 +32,8 @@ function __init__()
     global const infinity = giac("infinity")
     global const plus_inf = giac("plus_inf")
     global const minus_inf = giac("minus_inf")
+    global const giac_e = giac("e")
+    global const giac_pi = giac("pi")
 end
 
 
@@ -290,6 +292,9 @@ function Gen{T}(A::Array{T,2})
     Gen([reshape(A[i,:], size(A,2)) for i in 1:size(A,1)])
 end    
 
+Gen(::Irrational{:e}) = giac_e
+Gen(::Irrational{:π}) = giac_pi
+
 
 giac = Gen
 
@@ -310,6 +315,7 @@ end
 
 
 show(io::IO, g::Gen) = print(io, string(g))
+#show(io::IO, g::Gen) = print(io, "giac(\"", string(g), "\")")
 
 _pretty_print = false
 
@@ -317,8 +323,13 @@ function pretty_print(flag::Bool=true)
     global _pretty_print = flag
 end
 
-#writemime(io::IO, ::MIME"text/latex", ex::Gen) =  
-#    _pretty_print?write(io, "\$\$", latex(ex), "\$\$"):print(io, string(ex))
+#function writemime(io::IO, mime::MIME"text/latex", ex::Gen) 
+#    if _pretty_print
+#        write(io, "\$\$", latex(ex), "\$\$")
+#    else 
+#        print(io, string(ex))        
+#    end    
+#end
 
    
 function +(a::Gen, b::Gen)
@@ -452,6 +463,7 @@ include("library.jl")
 
 unapply(ex,var) = giac(:unapply, giac(Any[ex, var], subtype=1))
 store(val, var) = giac(:sto, [val, var])
+purge(var) = giac(:purge, var)
 giac_vars() = [Pair(left(x), right(x)) for x in to_julia(giac(:VARS, 1))] 
 
 #This magic code inspired by SymPy, cf.
