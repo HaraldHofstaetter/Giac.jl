@@ -4,6 +4,7 @@ module Giac
 import Base: string, show, write, writemime, expand, factor, collect 
 import Base: diff, sum, zeros, length, size, getindex, endof, call
 import Base: +, -, (*), /, ^, ==, >, <, >=, <=
+import Base: ctranspose
 import Base: real, imag, conj, abs, sign
 import Base: sqrt, exp, log, sin, cos, tan
 import Base: sinh, cosh, tanh, asin, acos, atan, acot, acsc
@@ -227,6 +228,12 @@ Gen(x) = undef
 function Gen(g::Gen)
    _gen(ccall(Libdl.dlsym(libgiac_c, "giac_copy_gen"), Ptr{Void}, (Ptr{Void},), g.g))
 end   
+
+function Gen(val::Bool)
+    g = _gen(ccall(Libdl.dlsym(libgiac_c, "giac_new_int"), Ptr{Void}, (Cint,), val?1:0))
+    change_subtype(g, 6)
+    g
+end    
 
 function Gen(val::Cint)
     _gen(ccall(Libdl.dlsym(libgiac_c, "giac_new_int"), Ptr{Void}, (Cint,), val))
@@ -518,8 +525,14 @@ end
 
 to_julia(g::Gen) = Gen(g)
 
-to_julia(g::Gen_INT_) =
-    ccall(Libdl.dlsym(libgiac_c, "giac_get_int"), Cint, (Ptr{Void},), g.g)
+function to_julia(g::Gen_INT_)
+   z = ccall(Libdl.dlsym(libgiac_c, "giac_get_int"), Cint, (Ptr{Void},), g.g)
+   if subtype(g)==6 #Bool
+       return z==1
+   else
+       return z
+   end    
+end    
 
 to_julia(g::Union{Gen_DOUBLE_, Gen_FLOAT_}) = 
     ccall(Libdl.dlsym(libgiac_c, "giac_get_double"), Cdouble, (Ptr{Void},), g.g)
