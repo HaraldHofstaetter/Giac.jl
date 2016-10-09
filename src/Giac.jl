@@ -22,7 +22,6 @@ export solve, cSolve, cZeros, fSolve, deSolve, linsolve
 export texpand
 
 
-
 function __init__()
     global const libgiac = Libdl.dlopen(joinpath(dirname(@__FILE__), "..", "deps", "lib",
                      string("libgiac.", Libdl.dlext)))
@@ -66,6 +65,8 @@ abstract Gen
     _POINTER_=20, # void * _POINTER_val
     _FLOAT_=21 # immediate, _FLOAT_val
 )
+
+config_vars = (:Digits, :epsilon)
 
 type Gen_INT_ <: Gen
     g::Ptr{Void}
@@ -494,7 +495,11 @@ macro giac(x...)
         elseif isa(s, Expr)&&s.head==:(=)&&isa(s.args[1],Symbol)
             push!(q.args, Expr(:(=), s.args[1], Expr(:call, :giac, 
                   Expr(:quote, string(s.args[1])))))
-            push!(q.args, Expr(:call, :store, s.args[2], s.args[1]))
+            if s.args[1] in config_vars
+                push!(q.args, Expr(:call, s.args[1], s.args[2]))
+            else
+                push!(q.args, Expr(:call, :store, s.args[2], s.args[1]))
+            end    
             if length(x)>1
                 push!(r.args, s.args[2])
             end    
