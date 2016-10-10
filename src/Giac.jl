@@ -415,7 +415,7 @@ function call(g::Gen, x)
 end
 
 function call(g::Gen, x...)
-    _gen(ccall(Libdl.dlsym(Giac.libgiac_c, "giac_call"), Ptr{Void}, 
+    _gen(ccall(Libdl.dlsym(libgiac_c, "giac_call"), Ptr{Void}, 
         (Ptr{Void},Ptr{Void},Ptr{Void}), g.g, Gen([x...],subtype=1).g, context_ptr))
 end
 
@@ -469,7 +469,6 @@ function Gen(f::Symbol, arg)
 end   
 
 include("library.jl")
-#include("plotting.jl")
 
 
 unapply(ex,var) = giac(:unapply, giac(Any[ex, var], subtype=1))
@@ -565,5 +564,45 @@ to_julia(g::Gen_CPLX) = complex(to_julia(real(g)), to_julia(imag(g)))
 to_julia(g::Gen_FRAC) = to_julia(numer(g))//to_julia(denom(g))
 
 to_julia(g::Gen_VECT) = [to_julia(g[i]) for i=1:length(g)]
+
+
+_head(ex::Gen) = symbol(string(head(ex))[2:end-1])
+
+function _args(ex)
+    a = args(ex)
+    if isa(a, Gen_VECT)&&subtype(args(ex))==1
+        a1 = to_julia(a)
+    else
+        a1 = Any[to_julia(a)]
+    end
+end
+
+_expr(x) = x
+_expr(ex::Gen_IDNT) = symbol(string(ex))
+
+function _expr(ex::Gen_SYMB)
+    h = _head(ex)
+    if h==:id
+        return _expr(args(ex))
+    end    
+    if h==:of
+        ex = evaluate(ex)
+        h = _head(ex)
+        @assert h!=:of "could not evaluate user-defined function"
+    end
+    if h==:ln  #Giac/ln corresponds to Julia/log 
+        h=:log
+    end
+    Expr(:call, h, [_expr(arg) for arg in _args(ex)]...)
+end
+
+function Giac.to_julia(ex::Giac.Gen_SYMB, var::Giac.Gen_IDNT, vars...) 
+    if length(vars) == 0
+        eval(Expr(:->, Giac._expr(var), Giac._expr(evaluate(ex))))
+    else
+        eval(Expr(:->, Expr(:tuple, Giac._expr(var), 
+            [Giac._expr(v) for v in vars]...), Giac._expr(evaluate(ex))))
+    end
+end
 
 end # module
