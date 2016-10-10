@@ -306,8 +306,6 @@ giac(::Irrational{:e}) = giac_e
 giac(::Irrational{:π}) = giac_pi
 
 
-giac = giac
-
 
 function string(g::giac)
    cs = ccall(Libdl.dlsym(libgiac_c, "giac_to_string"), Ptr{UInt8}, (Ptr{Void},Ptr{Void}), g.g, context_ptr) 
