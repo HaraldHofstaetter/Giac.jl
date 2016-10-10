@@ -12,7 +12,7 @@ import Base: asinh, acosh, atanh
 
 export @giac, giac, Gen, undef, infinity, giac_identifier
 export evaluate, evaluatef, evalf, simplify, to_julia, store, purge, giac_vars
-export unapply, simplify, plus_inf, minus_inf, latex, pretty_print
+export unapply, simplify, plus_inf, minus_inf, latex, pretty_print, head, args 
 
 export partfrac, subst, left, right, denom, numer
 export ⩦, equal
@@ -300,6 +300,8 @@ function Gen{T}(A::Array{T,2})
     Gen([reshape(A[i,:], size(A,2)) for i in 1:size(A,1)])
 end    
 
+Gen{T}(x::Range{T}) = Gen(collect(x))
+
 Gen(::Irrational{:e}) = giac_e
 Gen(::Irrational{:π}) = giac_pi
 
@@ -467,6 +469,7 @@ function Gen(f::Symbol, arg)
 end   
 
 include("library.jl")
+#include("plotting.jl")
 
 
 unapply(ex,var) = giac(:unapply, giac(Any[ex, var], subtype=1))
