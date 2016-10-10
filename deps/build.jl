@@ -1,4 +1,4 @@
-DOWNLOAD_BINARIES = true
+DOWNLOAD_BINARIES = searchindex(readall(`uname -a`), "juliabox")>0
 
 cd(dirname(@__FILE__))
 
