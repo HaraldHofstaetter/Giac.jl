@@ -607,6 +607,7 @@ end
 
 convert(::Type{giac}, x) = giac(x)
 convert{T<:Number}(::Type{T}, x::giacNumber) = convert(T,to_julia(x))
+
 function convert{T<:Number}(::Type{T}, ex::Union{giac_SYMB,giac_IDNT}) 
    ex = evaluate(ex)
    if isa(ex, giacNumber)
@@ -615,9 +616,10 @@ function convert{T<:Number}(::Type{T}, ex::Union{giac_SYMB,giac_IDNT})
       return convert(T,to_julia(evaluatef(ex)))
    end
 end   
-function convert(::Type{Function}, f::Union{giac_SYMB,giac_IDNT}) 
-   x = giac_identifier("__x__")
-   to_julia(f(x), x)
+
+function Base.convert(::Type{Function}, f::Union{Giac.giac_SYMB,Giac.giac_IDNT}) 
+    a = args(evaluate(f))
+    to_julia(to_julia(a[3]),to_julia(a[1])...)
 end   
 
 end # module
