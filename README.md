@@ -13,4 +13,5 @@ To get easy access to the examples, copy them into the home directory:
 cp(joinpath(homedir(), ".julia/v0.4/Giac/examples/"), joinpath(homedir(), "Giac_examples"), remove_destination=true)
 ```
 Then 'Giac_examples' will be listed in the JuliaBox home screen. The examples contain among others
++ [Giac_basics.ipynb](https://github.com/HaraldHofstaetter/Giac.jl/blob/master/examples/Giac_basics.ipynb)
 + [Giac_examples.ipynb](https://github.com/HaraldHofstaetter/Giac.jl/blob/master/examples/Giac_examples.ipynb)
