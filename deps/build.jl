@@ -8,9 +8,10 @@ end
 
 if DOWNLOAD_BINARIES
 
-   cd(joinpath(dirname(@__FILE__), "giac-1.2.2/src"))
+   cd(joinpath(dirname(@__FILE__), "lib"))
    download("http://harald-hofstaetter.at/Giac/libgiac.tgz", "./libgiac.tgz")
    run(`tar xzvf libgiac.tgz`)
+   run(`rm libgiac.tgz`)
 
 else # build from sources
 
