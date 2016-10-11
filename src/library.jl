@@ -32,12 +32,7 @@ numer(ex) = giac(:numer, ex)
 
 subst(ex, var, val) = giac(:subst, ex, var, val)
 subst(ex, var_val::Pair) = giac(:subst, ex, var_val[1], var_val[2])
-function subst(ex, sp::Pair...)
-    for p in sp
-        ex = subst(ex, p)
-    end    
-    ex    
-end
+subst(ex, sp::Pair...) = giac(:subst, ex, [[v,w] for (v,w) in sp]...)   
 call(sp::Pair, ex::Giac.giac) = subst(ex, sp)
 call(sp::Tuple{Vararg{Pair}}, ex::giac) = subst(ex, sp...)
 
