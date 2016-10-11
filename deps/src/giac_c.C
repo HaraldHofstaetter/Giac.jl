@@ -8,6 +8,7 @@
 using namespace std;
 using namespace giac;
 
+
 extern "C" {
 
     static _Gen* _error(const string &msg) 
@@ -634,7 +635,7 @@ extern "C" {
     }
 
 
-   /* expand needs special treatment: no C++ function named _expand */
+    /* expand needs special treatment: no C++ function named _expand */
     _Gen* giac_expand(_Gen* g, void *cp)
     {
         gen* r0;
@@ -643,6 +644,20 @@ extern "C" {
             context* cp0 = reinterpret_cast<context*>(cp);
             r0 = new gen();
             *r0 = expand(*g0, cp0);
+        }   
+        catch(runtime_error &e) {return _error(e.what());}
+        return reinterpret_cast<_Gen*>( r0 );
+    }
+
+    /* expexpand needs special treatment: no C++ function named _expexpand */
+    _Gen* giac_expexpand(_Gen* g, void *cp)
+    {
+        gen* r0;
+        try{
+            gen* g0 = reinterpret_cast<gen*>(g);
+            context* cp0 = reinterpret_cast<context*>(cp);
+            r0 = new gen();
+            *r0 = expexpand(*g0, cp0);
         }   
         catch(runtime_error &e) {return _error(e.what());}
         return reinterpret_cast<_Gen*>( r0 );

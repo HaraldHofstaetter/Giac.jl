@@ -75,8 +75,10 @@ extern "C"
     
 
     _Gen* giac_expand(_Gen* g, void *context_ptr);
+    _Gen* giac_expexpand(_Gen* g, void *context_ptr);
 
 
 #ifdef __cplusplus
 }
 #endif
+

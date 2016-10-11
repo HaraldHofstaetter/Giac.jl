@@ -19,7 +19,10 @@ export ⩦, equal
 export integrate, limit, series, curl, grad, divergence, hessian
 export preval, sum_riemann, taylor
 export solve, cSolve, cZeros, fSolve, deSolve, linsolve 
-export texpand
+export logcollect, powexpand,texpand, exp2pow, pow2exp, exp2trig, expexpand
+export asin2acos, asin2atan, acos2asin, acos2atan
+#export sin2costan, cos2sintan
+
 
 
 function __init__()
