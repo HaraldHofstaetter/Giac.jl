@@ -11,7 +11,7 @@ import Base: sinh, cosh, tanh, asin, acos, atan, acot, acsc
 import Base: asinh, acosh, atanh
 
 export @giac, giac, undef, infinity, giac_identifier
-export evaluate, evaluatef, evalf, simplify, to_julia, store, purge, giac_vars
+export evaluate, evaluatef, evalf, simplify, to_julia, set, purge, giac_vars
 export unapply, simplify, plus_inf, minus_inf, latex, pretty_print, head, args 
 
 export partfrac, subst, left, right, denom, numer
@@ -472,7 +472,7 @@ include("library.jl")
 
 
 unapply(ex,var) = giac(:unapply, giac(Any[ex, var], subtype=1))
-store(val, var) = giac(:sto, [val, var])
+set(var, val) = giac(:sto, [val, var])
 purge(var) = giac(:purge, var)
 giac_vars() = [Pair(left(x), right(x)) for x in to_julia(giac(:VARS, 1))] 
 
@@ -500,7 +500,7 @@ macro giac(x...)
             if s.args[1] in config_vars
                 push!(q.args, Expr(:call, s.args[1], s.args[2]))
             else
-                push!(q.args, Expr(:call, :store, s.args[2], s.args[1]))
+                push!(q.args, Expr(:call, :set, s.args[1], s.args[2]))
             end    
             if length(x)>1
                 push!(r.args, s.args[2])
@@ -510,11 +510,11 @@ macro giac(x...)
             push!(q.args, Expr(:(=), s.args[1].args[1], 
                  Expr(:call, :giac, Expr(:quote, string(s.args[1].args[1])))))
             if length(s.args[1].args)>2
-                push!(q.args, Expr(:call, :store, Expr(:call, :unapply, s.args[2], 
-                      Expr(:vect, s.args[1].args[2:end]...)), s.args[1].args[1]))
+                push!(q.args, Expr(:call, :set, s.args[1].args[1], Expr(:call, :unapply, s.args[2], 
+                      Expr(:vect, s.args[1].args[2:end]...))))
             else
-                push!(q.args, Expr(:call, :store, Expr(:call, :unapply, s.args[2], 
-                      s.args[1].args[2]), s.args[1].args[1]))
+                push!(q.args, Expr(:call, :set, s.args[1].args[1], Expr(:call, :unapply, s.args[2], 
+                      s.args[1].args[2])))
             end
             if length(x)>1
                 push!(r.args, s.args[1].args[2])
