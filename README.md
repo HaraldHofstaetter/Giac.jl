@@ -7,6 +7,8 @@ Julia interface to the [Giac computer algebra system](http://www-fourier.ujf-gre
 Pkg.clone("https://github.com/HaraldHofstaetter/Giac.jl")
 Pkg.build("Giac")
 ```
+In the general case (i.e., not inside a JuliaBox) the sources of the Giac C++ library are downloaded from  http://www-fourier.ujf-grenoble.fr/~parisse/giac/, from which then the library is built. 
+In a [JuliaBox](https://juliabox.com/), however, precompiled binaries of the library are downloaded from http://www.harald-hofstaetter.at/Giac/. (Due to the limited available disk space it is not possible to build these libraries from the sources inside a JuliaBox.)
 ##Examples
 To get easy access to the examples, copy them into the home directory:
 ```julia
