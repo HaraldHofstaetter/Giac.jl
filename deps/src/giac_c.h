@@ -74,13 +74,8 @@ extern "C"
     _Gen* giac_atanh(_Gen* a, void *context_ptr);
     
 
-    _Gen* giac_eval(_Gen* g, int levels, void *context_ptr);
-    _Gen* giac_evalf(_Gen* g, int levels, void *context_ptr);
-    _Gen* giac_simplify(_Gen* g, void *context_ptr);
     _Gen* giac_expand(_Gen* g, void *context_ptr);
-    _Gen* giac_factor1(_Gen* g, int with_sqrt, void *context_ptr);
 
-    _Gen* giac_integrate(_Gen* a, void *context_ptr);
 
 #ifdef __cplusplus
 }

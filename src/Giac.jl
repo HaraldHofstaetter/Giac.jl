@@ -12,7 +12,7 @@ import Base: asinh, acosh, atanh
 
 export @giac, giac, undef, infinity, giac_identifier
 export evaluate, evaluatef, evalf, simplify, to_julia, set, purge, giac_vars
-export unapply, simplify, plus_inf, minus_inf, latex, pretty_print, head, args 
+export unapply, plus_inf, minus_inf, latex, pretty_print, head, args 
 
 export partfrac, subst, left, right, denom, numer
 export ⩦, equal
@@ -432,34 +432,6 @@ for F in (:real, :imag, :conj, :abs,
        end   
    end
 end
-
-function evaluate(a::giac; levels=10)
-   _gen(ccall(Libdl.dlsym(libgiac_c, "giac_eval"), Ptr{Void}, (Ptr{Void},Cint,Ptr{Void}), a.g, levels, context_ptr))
-end   
-
-evaluate(s::ASCIIString; levels=10) = evaluate(giac(s), levels=levels)
-
-function evaluatef(a::giac; levels=10)
-   _gen(ccall(Libdl.dlsym(libgiac_c, "giac_evalf"), Ptr{Void}, (Ptr{Void},Cint,Ptr{Void}), a.g, levels, context_ptr))
-end   
-
-#eval = evaluate  # cannot overload Base.eval
-evalf = evaluatef
-
-function simplify(a::giac)
-   _gen(ccall(Libdl.dlsym(libgiac_c, "giac_simplify"), Ptr{Void}, (Ptr{Void},Ptr{Void}), a.g, context_ptr))
-end   
-
-simplify(s::ASCIIString) = simplify(giac(s))
-
-function expand(a::giac)
-   _gen(ccall(Libdl.dlsym(libgiac_c, "giac_expand"), Ptr{Void}, (Ptr{Void},Ptr{Void}), a.g, context_ptr))
-end   
-
-function factor(a::giac; with_sqrt::Bool=false)
-   _gen(ccall(Libdl.dlsym(libgiac_c, "giac_factor1"), Ptr{Void}, (Ptr{Void},Cint, Ptr{Void}), 
-              a.g, with_sqrt?1:0, context_ptr))
-end   
 
 
 function giac(f::Symbol, arg)

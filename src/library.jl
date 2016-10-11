@@ -8,6 +8,12 @@ acsc(x::giac) = giac(:acsc, x)
 adjoint_matrix(A) = giac(:adjoint_matrix, A)
 sign(x::giac) = giac(:sign,x)
 
+evaluate(ex::giac) = giac(:eval, ex)
+evaluatef(ex::giac) = giac(:evalf, ex)
+evalf = evaluatef
+simplify(ex::giac) = giac(:simplify, ex)
+factor(ex::giac) = giac(:factor, ex)
+expand(ex::giac) = giac(:expand, ex)
 collect(ex::giac) = giac(:collect, ex)
 collect(exs::Array{giac_SYMB}) = giac(:collect, giac(exs))
 factor(ex::giac, sr)= giac(:factor, ex, sr)

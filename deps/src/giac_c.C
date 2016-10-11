@@ -634,47 +634,7 @@ extern "C" {
     }
 
 
-    
-    _Gen* giac_eval(_Gen* g, int levels, void *cp)
-    {
-        gen* r0;
-        try{
-            gen* g0 = reinterpret_cast<gen*>(g);
-            context* cp0 = reinterpret_cast<context*>(cp);
-            r0 = new gen();
-            *r0 = g0->eval(levels, cp0);
-        }   
-        catch(runtime_error &e) {return _error(e.what());}
-        return reinterpret_cast<_Gen*>( r0 );
-    }
-
-    _Gen* giac_evalf(_Gen* g, int levels, void *cp)
-    {
-        gen* r0;
-        try{
-            gen* g0 = reinterpret_cast<gen*>(g);
-            context* cp0 = reinterpret_cast<context*>(cp);
-            r0 = new gen();
-            *r0 = g0->evalf(levels, cp0);
-        }   
-        catch(runtime_error &e) {return _error(e.what());}
-        return reinterpret_cast<_Gen*>( r0 );
-    }
-
-    
-    _Gen* giac_simplify(_Gen* g, void *cp)
-    {
-        gen* r0;
-        try{
-            gen* g0 = reinterpret_cast<gen*>(g);
-            context* cp0 = reinterpret_cast<context*>(cp);
-            r0 = new gen();
-            *r0 = simplify(*g0, cp0);
-        }   
-        catch(runtime_error &e) {return _error(e.what());}
-        return reinterpret_cast<_Gen*>( r0 );
-    }
-
+   /* expand needs special treatment: no C++ function named _expand */
     _Gen* giac_expand(_Gen* g, void *cp)
     {
         gen* r0;
@@ -683,19 +643,6 @@ extern "C" {
             context* cp0 = reinterpret_cast<context*>(cp);
             r0 = new gen();
             *r0 = expand(*g0, cp0);
-        }   
-        catch(runtime_error &e) {return _error(e.what());}
-        return reinterpret_cast<_Gen*>( r0 );
-    }
-
-    _Gen* giac_factor1(_Gen* g, int with_sqrt, void *cp)
-    {
-        gen* r0;
-        try{
-            gen* g0 = reinterpret_cast<gen*>(g);
-            context* cp0 = reinterpret_cast<context*>(cp);
-            r0 = new gen();
-            *r0 = factor(*g0, with_sqrt!=0, cp0);
         }   
         catch(runtime_error &e) {return _error(e.what());}
         return reinterpret_cast<_Gen*>( r0 );

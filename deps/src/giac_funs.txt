@@ -306,10 +306,10 @@ est_rectangle
 Eta
 euler
 euler_mac_laurin
-#eval
+eval
 evalb
 evalc
-#evalf
+evalf
 evalfa
 even
 exbissectrice
@@ -894,7 +894,7 @@ similitude
 simp2
 simplex_reduce
 simplifier
-#simplify
+simplify
 sincos
 singular
 size
