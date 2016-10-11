@@ -466,6 +466,8 @@ function giac(f::Symbol, arg)
    _gen(ccall(Libdl.dlsym(libgiac_c, string("giac_", f)), Ptr{Void}, (Ptr{Void},Ptr{Void}), giac(arg).g, context_ptr))
 end   
 
+giac(f::Symbol, args...) = giac(f, giac(Any[args...], subtype=1))
+
 include("library.jl")
 
 
