@@ -15,7 +15,7 @@ import Base: factorial, binomial, num, den
 
 export @giac, giac, undef, infinity, giac_identifier
 export evaluate, evaluatef, evalf, simplify, to_julia, set, purge, giac_vars
-export unapply, plus_inf, minus_inf, latex, pretty_print, head, args 
+export unapply, plus_inf, minus_inf, latex, prettyprint, head, args 
 
 export partfrac, subst, left, right
 export ⩦, equal
@@ -337,22 +337,14 @@ function latex(g::giac)
    s
 end
 
+prettyprint(ex::giac) = display("text/latex", string("\$\$",latex(ex),"\$\$"))
 
 show(io::IO, g::giac) = print(io, string(g))
 #show(io::IO, g::giac) = print(io, "giac(\"", string(g), "\")")
 
-_pretty_print = false
-
-function pretty_print(flag::Bool=true)
-    global _pretty_print = flag
-end
 
 #function writemime(io::IO, mime::MIME"text/latex", ex::giac) 
-#    if _pretty_print
-#        write(io, "\$\$", latex(ex), "\$\$")
-#    else 
-#        print(io, string(ex))        
-#    end    
+#    write(io, "\$\$", latex(ex), "\$\$")
 #end
 
    
