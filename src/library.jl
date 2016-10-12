@@ -1,10 +1,38 @@
 a2q(A,X) = giac(:a2q,A,X)
 abcuv(a,b,c) = giac(:abcuv,a,b,c)
 abcuv(a,b,c,var) = giac(:abcuv,a,b,c,var)
-acot(x::giac) = giac(:acot, x)
-acsc(x::giac) = giac(:acsc, x)
 adjoint_matrix(A) = giac(:adjoint_matrix, A)
+
+cot(x::giac) = giac(:cot, x)
+sec(x::giac) = giac(:sec, x)
+csc(x::giac) = giac(:csc, x)
+#sech(x::giac) = giac(:sech, x) # not available in Giac
+#csch(x::giac) = giac(:csch, x) # not available in Giac
+asec(x::giac) = giac(:asec, x)
+acsc(x::giac) = giac(:acsc, x)
+acot(x::giac) = giac(:acot, x)
+
 sign(x::giac) = giac(:sign,x)
+log(::Irrational{:e}, x::Giac.giac) = log(x)
+log(base, x::giac)  = giac(:logb, x, base)
+#log10(x::giac) = giac(:log10, x) # not available in Giac
+round(x::giac) = giac(:round, x)
+ceil(x::giac) = giac(:ceil, x)
+floor(x::giac) = giac(:floor, x)
+trunc(x::giac) = giac(:trunc, x)
+
+erf(x::giac) = giac(:erf, x)
+erfc(x::giac) = giac(:erfc, x)
+gamma(x::giac) = giac(:Gamma, x) #  Giac/Gamma -> Julia/gamma
+beta(x::giac, y) = giac(:Beta, x, y) # Giac/Beta -> Julia/beta
+zeta(x::giac) = giac(:Zeta, x)
+#airyai(x::giac) = giac(:Airy_Ai, x) # Giac/Airy_Ai does not work as expected
+#airybi(x::giac) = giac(:Airy_Bi, x)  # Giac/Airy_Bi does not work as expected
+besselj(nu,x::giac) = giac(:BesselJ, nu, x) # Giac/BesselJ -> Julia/besselj
+bessely(nu,x::giac) = giac(:BesselY, nu, x) # Giac/BesselY -> Julia/bessely
+
+
+
 
 evaluate(ex::giac) = giac(:eval, ex)
 evaluatef(ex::giac) = giac(:evalf, ex)

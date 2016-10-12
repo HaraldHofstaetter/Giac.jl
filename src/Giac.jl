@@ -5,10 +5,12 @@ import Base: string, show, write, writemime, expand, factor, collect
 import Base: diff, sum, zeros, length, size, getindex, endof, call
 import Base: +, -, (*), /, ^, ==, >, <, >=, <=
 import Base: ctranspose, convert
+import Base: round, floor, ceil, trunc
 import Base: real, imag, conj, abs, sign
-import Base: sqrt, exp, log, sin, cos, tan
-import Base: sinh, cosh, tanh, asin, acos, atan, acot, acsc
+import Base: sqrt, exp, log, log10, sin, cos, tan, sec, csc, cot
+import Base: sinh, cosh, tanh, asin, acos, atan, acot, asec, acsc
 import Base: asinh, acosh, atanh
+import Base: erf, erfc, gamma, beta, zeta, airyai, airybi, besselj, bessely
 
 export @giac, giac, undef, infinity, giac_identifier
 export evaluate, evaluatef, evalf, simplify, to_julia, set, purge, giac_vars
@@ -449,9 +451,9 @@ giac(f::Symbol, args...) = giac(f, giac(Any[args...], subtype=1))
 include("library.jl")
 
 
-unapply(ex,var) = giac(:unapply, giac(Any[ex, var], subtype=1))
-set(var, val) = giac(:sto, [val, var])
-purge(var) = giac(:purge, var)
+unapply(ex::giac,var) = giac(:unapply, ex, var)
+set(var::giac, val) = giac(:sto, val, var)
+purge(var::giac) = giac(:purge, var)
 giac_vars() = [Pair(left(x), right(x)) for x in to_julia(giac(:VARS, 1))] 
 
 #This magic code inspired by SymPy, cf.
@@ -570,6 +572,14 @@ function _expr(ex::giac_SYMB)
     end
     if h==:ln  #giac/ln corresponds to Julia/log 
         h=:log
+    elseif h==:Gamma
+        h=:gamma
+    elseif h==:Beta
+        h=:beta
+    elseif h==:BesselJ
+        h=:besselj
+    elseif h==:BesselY
+        h=:bessely
     end
     Expr(:call, h, [_expr(arg) for arg in _args(ex)]...)
 end

@@ -1,6 +1,62 @@
 using Giac
 using Base.Test
 
+#For elementary functions we check, whether the Giac/Function of a 
+#numerical value computes (approximately) the same result as the
+#corresponding Julia function
+
+for (ex, res) in [
+    (sqrt(giac(0.9)), sqrt(0.9)),
+    (exp(giac(0.9)), exp(0.9)),
+    (log(giac(0.9)), log(0.9)),
+    (log(3,giac(0.9)), log(3,0.9)),
+   #(log10(giac(0.9)), log10(0.9)), # log10 not available in Giac
+    (sin(giac(0.9)), sin(0.9)),
+    (cos(giac(0.9)), cos(0.9)),
+    (tan(giac(0.9)), tan(0.9)),
+    (cot(giac(0.9)), cot(0.9)),
+    (sec(giac(0.9)), sec(0.9)),
+    (csc(giac(0.9)), csc(0.9)),
+    (sinh(giac(0.9)), sinh(0.9)),
+    (cosh(giac(0.9)), cosh(0.9)),
+    (tanh(giac(0.9)), tanh(0.9)),
+    (asin(giac(0.9)), asin(0.9)),
+    (acos(giac(0.9)), acos(0.9)),
+    (atan(giac(0.9)), atan(0.9)),
+    (acot(giac(0.9)), acot(0.9)),
+    (asec(giac(1.9)), asec(1.9)), # |arg|>=1
+    (acsc(giac(1.9)), acsc(1.9)), # |arg|>=1
+    (asinh(giac(0.9)), asinh(0.9)),
+    (acosh(giac(1.9)), acosh(1.9)), #arg>=1
+    (atanh(giac(0.9)), atanh(0.9)),
+
+    (erf(giac(0.9)), erf(0.9)),
+    (erfc(giac(0.9)), erfc(0.9)),
+    (gamma(giac(0.9)), gamma(0.9)),
+    (beta(giac(0.9),giac(1.9)), beta(0.9,1.9)),
+    (zeta(giac(0.9)), zeta(0.9)),
+    #(airyai(giac(0.9)), airyai(0.9)), # Giac/Airy_Ai does not work as expected
+    #(airybi(giac(0.9)), airybi(0.9)), # Giac/Airy_Bi does not work as expected
+    (besselj(2,giac(0.9)), besselj(2,0.9)),
+    (bessely(2,giac(0.9)), bessely(2,0.9)),
+]
+    @test convert(Float64,ex) ≈ res
+end    
+
+@test convert(Float64, sign(giac(-12.3))) == -1.0
+@test convert(Float64, sign(giac(0.0))) == 0.0 
+@test convert(Float64, sign(giac(1.3))) == 1.0
+@test convert(Float64, round(giac(-1.7))) == -2.0
+@test convert(Float64, round(giac(1.4999))) == 1.0
+@test convert(Float64, ceil(giac(1.1))) == 2.0
+@test convert(Float64, ceil(giac(-1.1))) == -1.0
+@test convert(Float64, floor(giac(1.1))) == 1.0
+@test convert(Float64, floor(giac(-1.1))) == -2.0
+@test convert(Float64, trunc(giac(1.1))) == 1.0
+@test convert(Float64, trunc(giac(-1.1))) == -1.0
+
+
+
 #Note: We don't check whether the underlying Giac C++ library computes
 #correct results. We only test if the Julia functions in Giac.jl/src/library.jl
 #are correctly implemented. We assume that this is the case, if the Julia
