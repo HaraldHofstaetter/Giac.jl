@@ -21,7 +21,10 @@ export preval, sum_riemann, taylor
 export solve, cSolve, cZeros, fSolve, deSolve, linsolve 
 export logcollect, powexpand,texpand, exp2pow, pow2exp, exp2trig, expexpand
 export asin2acos, asin2atan, acos2asin, acos2atan
-#export sin2costan, cos2sintan
+export sin2costan, cos2sintan
+export atan2asin, atan2acos, tan2sincos, halftan
+export trigsin, trigcos, trigtan, atrig2log, tlin, tcollect, trigexpand
+export trig2exp
 
 
 

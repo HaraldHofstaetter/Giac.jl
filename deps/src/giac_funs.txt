@@ -1,3 +1,5 @@
+sin2costan
+cos2sintan
 #gen _det_minor(const gen & g,bool convert_internal,GIAC_CONTEXT);
 #gen _est(const gen & args,const propriete & f,GIAC_CONTEXT);
 #gen _exemple(const gen & args);

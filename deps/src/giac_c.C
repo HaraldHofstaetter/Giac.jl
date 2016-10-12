@@ -663,6 +663,21 @@ extern "C" {
         return reinterpret_cast<_Gen*>( r0 );
     }
 
+    /* trigexpand needs special treatment: no C++ function named _trigexpand */
+    _Gen* giac_trigexpand(_Gen* g, void *cp)
+    {
+        gen* r0;
+        try{
+            gen* g0 = reinterpret_cast<gen*>(g);
+            context* cp0 = reinterpret_cast<context*>(cp);
+            r0 = new gen();
+            *r0 = trigexpand(*g0, cp0);
+        }   
+        catch(runtime_error &e) {return _error(e.what());}
+        return reinterpret_cast<_Gen*>( r0 );
+    }
+    
+
 
     char* giac_to_string(_Gen* g, void *cp)
     {

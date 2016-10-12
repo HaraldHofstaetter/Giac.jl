@@ -1,3 +1,9 @@
+
+namespace giac { // present in subst.cc but not in subst.h
+gen _sin2costan(const gen & e,GIAC_CONTEXT);
+gen _cos2sintan(const gen & e,GIAC_CONTEXT);
+}
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -76,6 +82,7 @@ extern "C"
 
     _Gen* giac_expand(_Gen* g, void *context_ptr);
     _Gen* giac_expexpand(_Gen* g, void *context_ptr);
+    _Gen* giac_trigexpand(_Gen* g, void *context_ptr);
 
 
 #ifdef __cplusplus
