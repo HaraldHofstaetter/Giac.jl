@@ -8,7 +8,6 @@
 using namespace std;
 using namespace giac;
 
-
 extern "C" {
 
     static _Gen* _error(const string &msg) 

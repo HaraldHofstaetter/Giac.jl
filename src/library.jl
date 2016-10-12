@@ -114,4 +114,4 @@ integrate(ex::giac, var::giac, a::Union{giac,Number}, b::Union{giac,Number}) =
 head(ex::giac) = giac(:sommet, ex)
 args(ex::giac) = giac(:feuille, ex)
 
-
+# to be continued ...
