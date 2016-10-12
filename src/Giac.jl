@@ -4,19 +4,20 @@ module Giac
 import Base: string, show, write, writemime, expand, factor, collect 
 import Base: diff, sum, zeros, length, size, getindex, endof, call
 import Base: +, -, (*), /, ^, ==, >, <, >=, <=
-import Base: ctranspose, convert
+import Base: ctranspose, convert, one, zero
 import Base: round, floor, ceil, trunc
 import Base: real, imag, conj, abs, sign
 import Base: sqrt, exp, log, log10, sin, cos, tan, sec, csc, cot
 import Base: sinh, cosh, tanh, asin, acos, atan, acot, asec, acsc
 import Base: asinh, acosh, atanh
 import Base: erf, erfc, gamma, beta, zeta, airyai, airybi, besselj, bessely
+import Base: factorial, binomial, num, den
 
 export @giac, giac, undef, infinity, giac_identifier
 export evaluate, evaluatef, evalf, simplify, to_julia, set, purge, giac_vars
 export unapply, plus_inf, minus_inf, latex, pretty_print, head, args 
 
-export partfrac, subst, left, right, denom, numer
+export partfrac, subst, left, right
 export ⩦, equal
 export integrate, limit, series, curl, grad, divergence, hessian
 export preval, sum_riemann, taylor
@@ -42,6 +43,8 @@ function __init__()
     global const minus_inf = giac("minus_inf")
     global const giac_e = giac("e")
     global const giac_pi = giac("pi")
+    global const giac_one = giac(1)
+    global const giac_zero = giac(0)
 end
 
 
@@ -313,6 +316,11 @@ giac{T}(x::Range{T}) = giac(collect(x))
 giac(::Irrational{:e}) = giac_e
 giac(::Irrational{:π}) = giac_pi
 
+one(::Type{giac}) = giac_one
+one(::giac) = one(giac)
+zero(::Type{giac}) = giac_zero
+zero(::giac) = zero(giac)
+
 
 
 function string(g::giac)
@@ -353,6 +361,7 @@ function +(a::giac, b::giac)
 end   
 +(a::giac, b::Number) = a+giac(b)
 +(a::Number, b::giac) = giac(a)+b
++(a::giac) = a
 
 function -(a::giac, b::giac)
    _gen(ccall(Libdl.dlsym(libgiac_c, "giac_minus"), Ptr{Void}, (Ptr{Void},Ptr{Void}), a.g, b.g))

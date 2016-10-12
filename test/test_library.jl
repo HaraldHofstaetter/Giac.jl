@@ -35,6 +35,8 @@ for (ex, res) in [
     (gamma(giac(0.9)), gamma(0.9)),
     (beta(giac(0.9),giac(1.9)), beta(0.9,1.9)),
     (zeta(giac(0.9)), zeta(0.9)),
+    (factorial(giac(13)), factorial(13)),
+    (binomial(giac(13),giac(7)), binomial(13,7)),
     #(airyai(giac(0.9)), airyai(0.9)), # Giac/Airy_Ai does not work as expected
     #(airybi(giac(0.9)), airybi(0.9)), # Giac/Airy_Bi does not work as expected
     (besselj(2,giac(0.9)), besselj(2,0.9)),
@@ -85,12 +87,14 @@ ex1 = partfrac((x^2-2*x+3)/(x^2-3*x+2))
 ex2 = giac("partfrac((x^2-2*x+3)/(x^2-3*x+2))")
 @test evaluate(ex1) == evaluate(ex2)
 
-ex1 = numer((x^3-1)/(x^2-1))
+ex1 = num((x^3-1)/(x^2-1))
 ex2 = giac("numer((x^3-1)/(x^2-1))")
+#Note: Giac/numer -> Julia/num
 @test evaluate(ex1) == evaluate(ex2)
 
-ex1 = denom((x^3-1)/(x^2-1))
+ex1 = den((x^3-1)/(x^2-1))
 ex2 = giac("denom((x^3-1)/(x^2-1))")
+#Note: Giac/denom -> Julia/den
 @test evaluate(ex1) == evaluate(ex2)
 
 ex1 = left(x^2-1 ⩦ 2*x+3)
