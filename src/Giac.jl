@@ -14,7 +14,7 @@ import Base: erf, erfc, gamma, beta, zeta, airyai, airybi, besselj, bessely
 import Base: factorial, binomial, num, den
 
 export @giac, giac, undef, infinity, giac_identifier
-export evaluate, evaluatef, evalf, simplify, to_julia, set, purge, giac_vars
+export evaluate, evaluatef, evalf, simplify, to_julia, set!, purge!, giac_vars
 export unapply, plus_inf, minus_inf, latex, prettyprint, head, args 
 
 export partfrac, subst, left, right
@@ -453,8 +453,8 @@ include("library.jl")
 
 
 unapply(ex::giac,var) = giac(:unapply, ex, var)
-set(var::giac, val) = giac(:sto, val, var)
-purge(var::giac) = giac(:purge, var)
+set!(var::giac, val) = giac(:sto, val, var)
+purge!(var::giac) = giac(:purge, var)
 giac_vars() = [Pair(left(x), right(x)) for x in to_julia(giac(:VARS, 1))] 
 
 #This magic code inspired by SymPy, cf.
@@ -481,7 +481,7 @@ macro giac(x...)
             if s.args[1] in config_vars
                 push!(q.args, Expr(:call, s.args[1], s.args[2]))
             else
-                push!(q.args, Expr(:call, :set, s.args[1], s.args[2]))
+                push!(q.args, Expr(:call, :set!, s.args[1], s.args[2]))
             end    
             if length(x)>1
                 push!(r.args, s.args[2])
@@ -491,7 +491,7 @@ macro giac(x...)
             push!(q.args, Expr(:(=), s.args[1].args[1], 
                  Expr(:call, :giac, Expr(:quote, string(s.args[1].args[1])))))
             if length(s.args[1].args)>2
-                push!(q.args, Expr(:call, :set, s.args[1].args[1], Expr(:call, :unapply, s.args[2], 
+                push!(q.args, Expr(:call, :set!, s.args[1].args[1], Expr(:call, :unapply, s.args[2], 
                       Expr(:vect, s.args[1].args[2:end]...))))
             else
                 push!(q.args, Expr(:call, :set, s.args[1].args[1], Expr(:call, :unapply, s.args[2], 
