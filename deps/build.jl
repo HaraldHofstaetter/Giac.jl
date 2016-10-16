@@ -9,7 +9,8 @@ end
 if DOWNLOAD_BINARIES
 
    cd(joinpath(dirname(@__FILE__), "lib"))
-   download("http://harald-hofstaetter.at/Giac/libgiac.tgz", "./libgiac.tgz")
+   download("https://github.com/HaraldHofstaetter/Giac.jl/releases/download/0.1/libgiac.tgz", 
+            "./libgiac.tgz")
    run(`tar xzvf libgiac.tgz`)
    run(`rm libgiac.tgz`)
 
