@@ -9,7 +9,7 @@ import Base: round, floor, ceil, trunc
 import Base: real, imag, conj, abs, sign
 import Base: sqrt, exp, log, log10, sin, cos, tan, sec, csc, cot
 import Base: sinh, cosh, tanh, asin, acos, atan, acot, asec, acsc
-import Base: asinh, acosh, atanh
+import Base: asinh, acosh, atanh, expm1, log1p
 import Base: erf, erfc, gamma, beta, zeta, airyai, airybi, besselj, bessely
 import Base: factorial, binomial, num, den
 
@@ -19,6 +19,7 @@ export unapply, plus_inf, minus_inf, latex, prettyprint, head, args
 
 export partfrac, subst, left, right
 export ⩦, equal
+export Ei, Si, Ci
 export integrate, limit, series, curl, grad, divergence, hessian
 export preval, sum_riemann, taylor
 export solve, cSolve, cZeros, fSolve, deSolve, linsolve 

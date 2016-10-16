@@ -29,6 +29,8 @@ for (ex, res) in [
     (asinh(giac(0.9)), asinh(0.9)),
     (acosh(giac(1.9)), acosh(1.9)), #arg>=1
     (atanh(giac(0.9)), atanh(0.9)),
+    (expm1(giac(0.9)), expm1(0.9)),
+    (log1p(giac(0.9)), log1p(0.9)),
 
     (erf(giac(0.9)), erf(0.9)),
     (erfc(giac(0.9)), erfc(0.9)),
@@ -41,6 +43,9 @@ for (ex, res) in [
     #(airybi(giac(0.9)), airybi(0.9)), # Giac/Airy_Bi does not work as expected
     (besselj(2,giac(0.9)), besselj(2,0.9)),
     (bessely(2,giac(0.9)), bessely(2,0.9)),
+    (Ei(giac(0.9)), 1.6228117136968674413),
+    (Si(giac(0.9)), 0.86047071074529293277),
+    (Ci(giac(0.9)), 0.27606783046777286015),
 ]
     @test convert(Float64,ex) ≈ res
 end    
