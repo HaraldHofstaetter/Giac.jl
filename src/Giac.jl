@@ -317,9 +317,9 @@ giac{T}(x::Range{T}) = giac(collect(x))
 giac(::Irrational{:e}) = giac_e
 giac(::Irrational{:π}) = giac_pi
 
-one(::Type{giac}) = giac_one
+one{T<:giac}(::Type{T})=giac_one
 one(::giac) = one(giac)
-zero(::Type{giac}) = giac_zero
+zero{T<:giac}(::Type{T})=giac_zero
 zero(::giac) = zero(giac)
 
 
