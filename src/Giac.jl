@@ -543,7 +543,7 @@ end
 
 to_julia(g::giac_CPLX) = complex(to_julia(real(g)), to_julia(imag(g))) 
 
-to_julia(g::giac_FRAC) = to_julia(numer(g))//to_julia(denom(g))
+to_julia(g::giac_FRAC) = to_julia(num(g))//to_julia(den(g))
 
 to_julia(g::giac_VECT) = [to_julia(g[i]) for i=1:length(g)]
 
