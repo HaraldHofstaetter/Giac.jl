@@ -144,6 +144,9 @@ tcollect(ex) = giac(:tcollect, ex)
 trigexpand(ex) = giac(:trigexpand, ex)
 trig2exp(ex) = giac(:trig2exp, ex)
 
+gbasis(polys, vars) = giac(:gbasis, polys, vars)
+greduce(poly, basis, vars) = giac(:greduce, poly, basis, vars)
+
 
 integrate(ex::giac) = giac(:integrate, ex)
 integrate(ex::giac, var::giac) = giac(:integrate, ex, var)

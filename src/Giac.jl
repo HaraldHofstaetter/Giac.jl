@@ -29,6 +29,7 @@ export sin2costan, cos2sintan
 export atan2asin, atan2acos, tan2sincos, halftan
 export trigsin, trigcos, trigtan, atrig2log, tlin, tcollect, trigexpand
 export trig2exp
+export gbasis, greduce
 
 
 
