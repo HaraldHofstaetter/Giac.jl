@@ -328,14 +328,14 @@ zero(::giac) = zero(giac)
 function string(g::giac)
    cs = ccall(Libdl.dlsym(libgiac_c, "giac_to_string"), Ptr{UInt8}, (Ptr{Void},Ptr{Void}), g.g, context_ptr) 
    s = bytestring(cs)
-   ccall((:free, "libc"), Void, (Ptr{Void},), cs)
+   ccall(Libdl.dlsym(libgiac_c, "giac_free"), Void, (Ptr{Void},), cs)
    s
 end
 
 function latex(g::giac)
    cs = ccall(Libdl.dlsym(libgiac_c, "giac_to_latex"), Ptr{UInt8}, (Ptr{Void},Ptr{Void}), g.g, context_ptr) 
    s = bytestring(cs)
-   ccall((:free, "libc"), Void, (Ptr{Void},), cs)
+   ccall(Libdl.dlsym(libgiac_c, "giac_free"), Void, (Ptr{Void},), cs)
    s
 end
 

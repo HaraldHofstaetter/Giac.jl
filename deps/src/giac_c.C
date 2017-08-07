@@ -4,6 +4,7 @@
 #include "giac.h"
 #include "giac_c.h"
 #include<string>
+#include <stdlib.h>
 
 using namespace std;
 using namespace giac;
@@ -710,6 +711,11 @@ extern "C" {
             return 0; 
         }
         return cs;
+    }
+
+    void giac_free(void *ptr) 
+    {
+        free(ptr);
     }
 
 

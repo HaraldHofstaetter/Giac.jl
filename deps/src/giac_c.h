@@ -40,6 +40,7 @@ extern "C"
 
     char* giac_to_string(_Gen* g, void *context_ptr);
     char* giac_to_latex(_Gen* g, void *context_ptr);
+    void giac_free(void *ptr);
 
     _Gen* giac_undef(void);
 
