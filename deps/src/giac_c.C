@@ -5,6 +5,7 @@
 #include "giac_c.h"
 #include<string>
 #include <stdlib.h>
+#include <mpfr.h>
 
 using namespace std;
 using namespace giac;

@@ -1,6 +1,8 @@
 using Giac
 using Base.Test
 
+using SpecialFunctions
+
 #For elementary functions we check, whether the Giac/Function of a 
 #numerical value computes (approximately) the same result as the
 #corresponding Julia function

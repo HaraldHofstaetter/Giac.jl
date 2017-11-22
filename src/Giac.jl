@@ -1,8 +1,8 @@
 __precompile__()
 module Giac
 
-import Base: string, show, write, writemime, expand, factor, collect 
-import Base: diff, sum, zeros, length, size, getindex, endof, call
+import Base: string, show, write, expand, collect 
+import Base: diff, sum, zeros, length, size, getindex, endof
 import Base: +, -, (*), /, ^, ==, >, <, >=, <=
 import Base: ctranspose, convert, one, zero
 import Base: round, floor, ceil, trunc
@@ -29,7 +29,7 @@ export sin2costan, cos2sintan
 export atan2asin, atan2acos, tan2sincos, halftan
 export trigsin, trigcos, trigtan, atrig2log, tlin, tcollect, trigexpand
 export trig2exp
-export gbasis, greduce
+export gbasis, greduce, factor
 
 
 
@@ -50,7 +50,8 @@ function __init__()
 end
 
 
-abstract giac
+abstract type giac end
+
 
 
 # from giac/dispatch.h:  
@@ -81,91 +82,91 @@ abstract giac
 
 config_vars = (:Digits, :epsilon)
 
-type giac_INT_ <: giac
+mutable struct giac_INT_ <: giac
     g::Ptr{Void}
 end
 
-type giac_DOUBLE_ <: giac
+mutable struct giac_DOUBLE_ <: giac
     g::Ptr{Void}
 end
 
-type giac_ZINT <: giac
+mutable struct giac_ZINT <: giac
     g::Ptr{Void}
 end
 
-type giac_REAL  <: giac
+mutable struct giac_REAL  <: giac
     g::Ptr{Void}
 end
 
-type giac_CPLX <: giac
+mutable struct giac_CPLX <: giac
     g::Ptr{Void}
 end
 
-type giac_POLY <: giac
+mutable struct giac_POLY <: giac
     g::Ptr{Void}
 end
 
-type giac_IDNT <: giac
+mutable struct giac_IDNT <: giac
     g::Ptr{Void}
 end
 
-type giac_VECT <: giac
+mutable struct giac_VECT <: giac
     g::Ptr{Void}
 end
 
-type giac_SYMB <: giac
+mutable struct giac_SYMB <: giac
     g::Ptr{Void}
 end
 
-type giac_SPOL1 <: giac
+mutable struct giac_SPOL1 <: giac
     g::Ptr{Void}
 end
 
-type giac_FRAC <: giac
+mutable struct giac_FRAC <: giac
     g::Ptr{Void}
 end
 
-type giac_EXT <: giac
+mutable struct giac_EXT <: giac
     g::Ptr{Void}
 end
 
-type giac_STRNG <: giac
+mutable struct giac_STRNG <: giac
     g::Ptr{Void}
 end
 
-type giac_FUNC <: giac
+mutable struct giac_FUNC <: giac
     g::Ptr{Void}
 end
 
-type giac_ROOT <: giac
+mutable struct giac_ROOT <: giac
     g::Ptr{Void}
 end
 
-type giac_MOD <: giac
+mutable struct giac_MOD <: giac
     g::Ptr{Void}
 end
 
-type giac_USER <: giac
+mutable struct giac_USER <: giac
     g::Ptr{Void}
 end
 
-type giac_MAP <: giac
+mutable struct giac_MAP <: giac
     g::Ptr{Void}
 end
 
-type giac_EQW <: giac
+mutable struct giac_EQW <: giac
     g::Ptr{Void}
 end
 
-type giac_GROB <: giac
+mutable struct giac_GROB <: giac
     g::Ptr{Void}
 end
 
-type giac_POINTER_ <: giac
+mutable struct giac_POINTER_ <: giac
     g::Ptr{Void}
 end
 
-type giac_FLOAT_ <: giac
+mutable struct giac_FLOAT_ <: giac
     g::Ptr{Void}
 end
 
@@ -293,13 +294,13 @@ function giac(val::Complex{Cdouble})
     _gen(ccall(Libdl.dlsym(libgiac_c, "giac_new_complex_double"), Ptr{Void}, (Cdouble, Cdouble), real(val), real(val)))
 end
 
-function giac_identifier(s::ASCIIString)
-    _gen(ccall(Libdl.dlsym(libgiac_c, "giac_new_ident"), Ptr{Void}, (Ptr{UInt8},), s))
+function giac_identifier(s::AbstractString)
+    _gen(ccall(Libdl.dlsym(libgiac_c, "giac_new_ident"), Ptr{Void}, (Cstring,), s))
 end
 
 
-function giac(s::ASCIIString)
-    _gen(ccall(Libdl.dlsym(libgiac_c, "giac_new_symbolic"), Ptr{Void}, (Ptr{UInt8},Ptr{Void}), s, context_ptr))
+function giac(s::AbstractString)
+    _gen(ccall(Libdl.dlsym(libgiac_c, "giac_new_symbolic"), Ptr{Void}, (Cstring,Ptr{Void}), s, context_ptr))
 end
 
 function giac{T}(v::Array{T,1}; subtype::Integer=0)
@@ -327,14 +328,14 @@ zero(::giac) = zero(giac)
 
 function string(g::giac)
    cs = ccall(Libdl.dlsym(libgiac_c, "giac_to_string"), Ptr{UInt8}, (Ptr{Void},Ptr{Void}), g.g, context_ptr) 
-   s = bytestring(cs)
+   s = unsafe_string(cs)
    ccall(Libdl.dlsym(libgiac_c, "giac_free"), Void, (Ptr{Void},), cs)
    s
 end
 
 function latex(g::giac)
    cs = ccall(Libdl.dlsym(libgiac_c, "giac_to_latex"), Ptr{UInt8}, (Ptr{Void},Ptr{Void}), g.g, context_ptr) 
-   s = bytestring(cs)
+   s = unsafe_string(cs)
    ccall(Libdl.dlsym(libgiac_c, "giac_free"), Void, (Ptr{Void},), cs)
    s
 end
@@ -418,12 +419,34 @@ function getindex(g::giac_VECT, i)
    _gen(ccall(Libdl.dlsym(libgiac_c, "giac_getindex"), Ptr{Void}, (Ptr{Void},Cint), g.g, i-1))
 end
 
-function call(g::giac, x)
+#function call(g::giac, x)
+function (g::Giac.giac_FUNC)(x)
    _gen(ccall(Libdl.dlsym(libgiac_c, "giac_call"), Ptr{Void}, 
        (Ptr{Void},Ptr{Void},Ptr{Void}), g.g, giac(x).g, context_ptr))
 end
 
-function call(g::giac, x...)
+function (g::Giac.giac_IDNT)(x)
+   _gen(ccall(Libdl.dlsym(libgiac_c, "giac_call"), Ptr{Void}, 
+       (Ptr{Void},Ptr{Void},Ptr{Void}), g.g, giac(x).g, context_ptr))
+end
+
+function (g::Giac.giac_SYMB)(x)
+   _gen(ccall(Libdl.dlsym(libgiac_c, "giac_call"), Ptr{Void}, 
+       (Ptr{Void},Ptr{Void},Ptr{Void}), g.g, giac(x).g, context_ptr))
+end
+
+#function call(g::giac, x...)
+function (g::Giac.giac_FUNC)(x...)
+    _gen(ccall(Libdl.dlsym(libgiac_c, "giac_call"), Ptr{Void}, 
+        (Ptr{Void},Ptr{Void},Ptr{Void}), g.g, giac([x...],subtype=1).g, context_ptr))
+end
+
+function (g::Giac.giac_IDNT)(x...)
+    _gen(ccall(Libdl.dlsym(libgiac_c, "giac_call"), Ptr{Void}, 
+        (Ptr{Void},Ptr{Void},Ptr{Void}), g.g, giac([x...],subtype=1).g, context_ptr))
+end
+
+function (g::Giac.giac_SYMB)(x...)
     _gen(ccall(Libdl.dlsym(libgiac_c, "giac_call"), Ptr{Void}, 
         (Ptr{Void},Ptr{Void},Ptr{Void}), g.g, giac([x...],subtype=1).g, context_ptr))
 end
@@ -496,7 +519,7 @@ macro giac(x...)
                 push!(q.args, Expr(:call, :set!, s.args[1].args[1], Expr(:call, :unapply, s.args[2], 
                       Expr(:vect, s.args[1].args[2:end]...))))
             else
-                push!(q.args, Expr(:call, :set, s.args[1].args[1], Expr(:call, :unapply, s.args[2], 
+                push!(q.args, Expr(:call, :set!, s.args[1].args[1], Expr(:call, :unapply, s.args[2], 
                       s.args[1].args[2])))
             end
             if length(x)>1
@@ -549,7 +572,7 @@ to_julia(g::giac_FRAC) = to_julia(num(g))//to_julia(den(g))
 to_julia(g::giac_VECT) = [to_julia(g[i]) for i=1:length(g)]
 
 
-_head(ex::giac) = symbol(string(head(ex))[2:end-1])
+_head(ex::giac) = Symbol(string(head(ex))[2:end-1])
 
 function _args(ex)
     a = args(ex)
@@ -561,7 +584,7 @@ function _args(ex)
 end
 
 _expr(x) = x
-_expr(ex::giac_IDNT) = symbol(string(ex))
+_expr(ex::giac_IDNT) = Symbol(string(ex))
 
 function _expr(ex::giac_SYMB)
     h = _head(ex)
