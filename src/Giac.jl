@@ -620,6 +620,7 @@ function to_julia(ex::giac_SYMB, var::giac_IDNT, vars...)
 end
 
 convert(::Type{giac}, x) = giac(x)
+convert(::Type{giac}, x::giac) = x # to avoid some ambiguities
 convert{T<:Number}(::Type{T}, x::giacNumber) = convert(T,to_julia(x))
 
 function convert{T<:Number}(::Type{T}, ex::Union{giac_SYMB,giac_IDNT}) 
