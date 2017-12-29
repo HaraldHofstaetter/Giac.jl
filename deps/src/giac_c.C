@@ -255,6 +255,7 @@ extern "C" {
         return reinterpret_cast<_Gen*>(new gen(undef));
     }
 
+
     _Gen* giac_plus(_Gen *a, _Gen *b)
     {
         gen* r0;
