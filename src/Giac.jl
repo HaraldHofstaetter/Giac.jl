@@ -34,8 +34,6 @@ export gbasis, greduce, factor
 
 
 function __init__()
-    global const libgiac = Libdl.dlopen(joinpath(dirname(@__FILE__), "..", "deps", "lib",
-                     string("libgiac.", Libdl.dlext)))
     global const libgiac_c = Libdl.dlopen(joinpath(dirname(@__FILE__), "..", "deps", "lib",
                      string("libgiac_c.", Libdl.dlext)))
     global const context_ptr = ccall(Libdl.dlsym(libgiac_c, "giac_context_ptr"), Ptr{Void}, () )
