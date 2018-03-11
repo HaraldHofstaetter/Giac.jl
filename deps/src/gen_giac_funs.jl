@@ -1,5 +1,5 @@
 print("""
-#include "giac.h"
+#include "giac/giac.h"
 #include "giac_c.h"
 #include<string>
 

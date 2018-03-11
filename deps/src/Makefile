@@ -1,13 +1,10 @@
 all: shared_lib
 
-CFLAGS =  -O2 -DHAVE_CONFIG_H 
-CC = gcc-5 $(CFLAGS)
-CPP = g++-5 $(CFLAGS)
+CFLAGS =  -O2  -DHAVE_LIBMPFR  
+CC = gcc $(CFLAGS)
+CPP = g++ $(CFLAGS)
 
-LIBDIR = -L../lib
-INCDIR = -I../include/giac
-LIBS = ../lib/libgiac.so
-
+INCDIR =
 
 # Figure out OS and architecture
 OS = $(shell uname)
@@ -39,9 +36,8 @@ giac_funs.C: gen_giac_funs.jl giac_funs.txt
 giac_funs.o: giac_funs.C
 	$(CPP) -fpic $(INCDIR)  -c $<
 
-
 libgiac_c.$(SHLIB_EXT): $(OBJS)
-	$(CPP) $(OBJS) -rdynamic -shared -o $@ $(LIBDIR) $(LIBS)
+	$(CPP) $(OBJS) -rdynamic -shared -o $@ -lgiac
 
 
 clean:

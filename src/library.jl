@@ -45,6 +45,10 @@ bessely(nu,x::giac) = giac(:BesselY, nu, x) # Giac/BesselY -> Julia/bessely
 
 
 
+evaluate(x) = x 
+evaluatef(x) = x 
+simplify(x) = x 
+
 evaluate(ex::giac) = giac(:eval, ex)
 evaluatef(ex::giac) = giac(:evalf, ex)
 evalf = evaluatef

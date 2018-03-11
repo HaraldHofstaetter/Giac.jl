@@ -1,9 +1,9 @@
 // http://stackoverflow.com/questions/2045774/developing-c-wrapper-api-for-object-oriented-c-code
 
 
-#include "giac.h"
+#include "giac/giac.h"
 #include "giac_c.h"
-#include<string>
+#include <string>
 #include <stdlib.h>
 #include <mpfr.h>
 
