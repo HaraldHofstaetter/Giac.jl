@@ -406,6 +406,12 @@ end
 <(a::giacReal, b::Real) = a<giac(b)
 >(a::Real, b::giacReal) = giac(a)>b
 
+*(x::giac, a::Array) = (y->x*y).(a)
+*(a::Array, x::giac) = (y->y*x).(a)
++(x::giac, a::Array) = (y->x+y).(a)
++(a::Array, x::giac) = (y->y+x).(a)
+-(x::giac, a::Array) = (y->x-y).(a)
+-(a::Array, x::giac) = (y->y-x).(a)
 
 function size(g::giac)
    ccall(Libdl.dlsym(libgiac_c, "giac_size1"), Cint, (Ptr{Void},), g.g)
