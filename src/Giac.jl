@@ -19,7 +19,7 @@ import SpecialFunctions: airyai, airybi
 export @giac, giac, giac_identifier
 export evaluate, evaluatef, evalf, simplify, to_julia, set!, purge!, giac_vars
 export unapply, latex, prettyprint, head, args 
-export infinity, plus_inf, minus_inf
+export infinity, plus_inf, minus_inf, undef
 
 export partfrac, subst, left, right
 export ⩦, equal
@@ -50,7 +50,8 @@ function __init__()
     libgiac_c[] = dlopen(joinpath(dirname(@__FILE__), "..", "deps", "lib",
                          string("libgiac_c.", dlext)))
     context_ptr[] = ccall(dlsym(libgiac_c[], "giac_context_ptr"), Ptr{Nothing}, () )
-    giac_undef[] = _gen(ccall(dlsym(libgiac_c[], "giac_undef"), Ptr{Nothing}, () ))
+    giac_undef[] = giac("undef") 
+    global undef = giac_undef[]
     global infinity = giac("infinity")
     global plus_inf = giac("plus_inf")
     global minus_inf = giac("minus_inf")

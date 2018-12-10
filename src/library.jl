@@ -74,10 +74,7 @@ denominator(ex::giac) = giac(:denom, ex) #Giac/denom -> Julia/denominator
 numerator(ex::giac) = giac(:numer, ex) #Giac/numer -> Julia/numerator
 
 subst(ex, var, val) = giac(:subst, ex, var, val)
-subst(ex, var_val::Pair) = giac(:subst, ex, var_val[1], var_val[2])
-subst(ex, sp::Pair...) = giac(:subst, ex, [[v,w] for (v,w) in sp]...)   
-call(sp::Pair, ex::Giac.giac) = subst(ex, sp)
-call(sp::Tuple{Vararg{Pair}}, ex::giac) = subst(ex, sp...)
+subst(ex, sp::Pair...) = subst(ex, [v for (v,w) in sp], [w for (v,w) in sp])
 
 limit(ex, var, val) = giac(:limit, ex, var, val)
 limit(ex, var_val::Pair) = giac(:limit, ex, var_val[1], var_val[2])
