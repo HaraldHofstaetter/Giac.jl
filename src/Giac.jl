@@ -13,13 +13,14 @@ import Base: sqrt, exp, log, log10, sin, cos, tan, sec, csc, cot
 import Base: sinh, cosh, tanh, asin, acos, atan, acot, asec, acsc
 import Base: asinh, acosh, atanh, expm1, log1p
 import Base: factorial, binomial, numerator, denominator
+import core
 import SpecialFunctions: gamma, beta, zeta, besselj, bessely, erfc, erf
 import SpecialFunctions: airyai, airybi
 
 export @giac, giac, giac_identifier
 export evaluate, evaluatef, evalf, simplify, to_julia, set!, purge!, giac_vars
 export unapply, latex, prettyprint, head, args 
-export infinity, plus_inf, minus_inf, undef
+export infinity, plus_inf, minus_inf
 
 export partfrac, subst, left, right
 export ⩦, equal
@@ -51,7 +52,6 @@ function __init__()
                          string("libgiac_c.", dlext)))
     context_ptr[] = ccall(dlsym(libgiac_c[], "giac_context_ptr"), Ptr{Nothing}, () )
     giac_undef[] = giac("undef") 
-    global undef = giac_undef[]
     global infinity = giac("infinity")
     global plus_inf = giac("plus_inf")
     global minus_inf = giac("minus_inf")
