@@ -13,7 +13,6 @@ import Base: sqrt, exp, log, log10, sin, cos, tan, sec, csc, cot
 import Base: sinh, cosh, tanh, asin, acos, atan, acot, asec, acsc
 import Base: asinh, acosh, atanh, expm1, log1p
 import Base: factorial, binomial, numerator, denominator
-import core
 import SpecialFunctions: gamma, beta, zeta, besselj, bessely, erfc, erf
 import SpecialFunctions: airyai, airybi
 
