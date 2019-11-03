@@ -1,3 +1,5 @@
+using Libdl
+
 cd(dirname(@__FILE__))
 
 if (!ispath("lib"))
@@ -6,5 +8,5 @@ end
 
 cd("src")
 run(`make`)
-run(`mv libgiac_c.$(Libdl.dlext) ../lib`)
+run(`mv libgiac_c.$(dlext) ../lib`)
 
