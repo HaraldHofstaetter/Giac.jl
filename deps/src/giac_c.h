@@ -11,7 +11,11 @@ extern "C"
     struct _Gen;
     typedef struct _Gen _Gen;
 
-    void* giac_context_ptr();
+    struct _Context;
+    typedef struct _Context _Context;
+
+    _Context* giac_context_ptr(); 
+    void giac_delete_context(_Context* ptr);
 
     _Gen* giac_copy_gen(_Gen* g);
     _Gen* giac_new_int(int val);

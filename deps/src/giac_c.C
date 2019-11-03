@@ -14,18 +14,23 @@ extern "C" {
 
     static _Gen* _error(const string &msg) 
     {
-        cerr << msg << endl;
+        cerr << "GIAC ERROR: " << msg << endl;
         return giac_undef();
     }
 
-    void* giac_context_ptr(void)
+    _Context* giac_context_ptr(void)
     {
          context* r0;
          try{ 
             r0 = new context(); 
          } 
          catch(runtime_error &e) {return 0;}
-         return reinterpret_cast<void*>( r0 );
+         return reinterpret_cast<_Context*>( r0 );
+    }
+
+    void giac_delete_context(_Context* c)
+    {
+        delete reinterpret_cast<const context*>(c);
     }
 
 
