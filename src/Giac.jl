@@ -3,10 +3,10 @@ module Giac
 
 using Libdl
 
-import Base: string, show, write, expand, collect 
-import Base: diff, sum, zeros, length, size, getindex, endof
+import Base: string, show, write, collect 
+import Base: diff, sum, zeros, length, size, getindex
 import Base: +, -, (*), /, ^, ==, >, <, >=, <=
-import Base: ctranspose, convert, one, zero
+import Base: convert, one, zero
 import Base: round, floor, ceil, trunc
 import Base: real, imag, conj, abs, sign
 import Base: sqrt, exp, log, log10, sin, cos, tan, sec, csc, cot
@@ -17,7 +17,7 @@ import SpecialFunctions: gamma, beta, zeta, besselj, bessely, erfc, erf
 import SpecialFunctions: airyai, airybi
 
 export @giac, giac, giac_identifier
-export evaluate, evaluatef, evalf, simplify, to_julia, set!, purge!, giac_vars
+export evaluate, evaluatef, evalf, simplify, expand, to_julia, set!, purge!, giac_vars
 export unapply, latex, prettyprint, head, args 
 export infinity, plus_inf, minus_inf
 
@@ -49,7 +49,8 @@ const giac_e = Ref{giac}()
 function __init__()
     libgiac_c[] = dlopen(joinpath(dirname(@__FILE__), "..", "deps", "lib",
                          string("libgiac_c.", dlext)))
-    context_ptr[] = ccall(dlsym(libgiac_c[], "giac_context_ptr"), Ptr{Nothing}, () )
+    #context_ptr[] = ccall(dlsym(libgiac_c[], "giac_context_ptr"), Ptr{Nothing}, () )
+    context_ptr[] = 0
     giac_undef[] = giac("undef") 
     global infinity = giac("infinity")
     global plus_inf = giac("plus_inf")
@@ -466,7 +467,6 @@ end
 
 
 
-endof(g::giac_VECT) = size(g)
 
 # unary functions with context_ptr:
 for F in (:real, :imag, :conj, :abs,
@@ -549,6 +549,7 @@ macro giac(x...)
 end
 
 
+to_julia(x) = x
 to_julia(g::giac) = giac(g)
 
 function to_julia(g::giac_INT_)
