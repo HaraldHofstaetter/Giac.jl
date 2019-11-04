@@ -1,5 +1,5 @@
 __precompile__()
-module Giac1
+module Giac
 
 using Libdl
 
@@ -35,22 +35,16 @@ export trigsin, trigcos, trigtan, atrig2log, tlin, tcollect, trigexpand
 export trig2exp
 export gbasis, greduce, factor
 
-#mutable struct _giac
-#end
-#const giac_ptr = Ptr{_giac}
 
-const giac_ptr = Ptr{Nothing}
 
 mutable struct giac
-    g::giac_ptr
-    function giac(g::giac_ptr)
+    g::Ptr{Nothing}
+    function giac(g::Ptr{Nothing})
         gg = new(g)
         finalizer(_delete, gg)
         gg
     end
 end
-
-
 
 
 const libgiac_c = Ref{Ptr{Cvoid}}(0)
@@ -104,9 +98,6 @@ end
 )
 
 config_vars = (:Digits, :epsilon)
-
-
-
 
 giactype(g::giac) = unsafe_load(Ptr{UInt8}(g.g), 1) & 31 
 subtype(g::giac) = unsafe_load(Ptr{UInt8}(g.g), 2) & 31
@@ -524,7 +515,7 @@ function convert(::Type{Function}, f::giac)
          a = args(evaluate(f))
          return _xxx_to_julia(to_julia(a[3]),to_julia(a[1])...)
     else
-         error("Could not convert giac to Number")
+         error("Could not convert giac to Function")
     end
 end   
 
