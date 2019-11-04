@@ -499,7 +499,7 @@ function _expr(ex::giac)
   end
 end
 
-function _xxx_to_julia(ex::giac, var::giac, vars...) 
+function to_julia(ex::giac, var::giac, vars...) 
     @assert giactype(ex)==Int(_SYMB) && giactype(var)==Int(_IDNT)
     if length(vars) == 0
         eval(Expr(:->, _expr(var), _expr(evaluate(ex))))
@@ -513,7 +513,7 @@ end
 function convert(::Type{Function}, f::giac) 
     if giactype(f)==Int(_SYMB) || giactype(f)==Int(_IDNT)
          a = args(evaluate(f))
-         return _xxx_to_julia(to_julia(a[3]),to_julia(a[1])...)
+         return to_julia(to_julia(a[3]),to_julia(a[1])...)
     else
          error("Could not convert giac to Function")
     end
