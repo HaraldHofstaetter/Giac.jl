@@ -6,15 +6,15 @@ using Libdl
 import Base: string, show, write, collect 
 import Base: diff, sum, zeros, length, size, getindex
 import Base: +, -, (*), /, ^, ==, >, <, >=, <=
-import Base: convert, one, zero
+import Base: convert, one, oneunit, zero, inv
 import Base: round, floor, ceil, trunc
-import Base: real, imag, conj, abs, sign
+import Base: real, imag, conj, adjoint, abs, sign
 import Base: sqrt, exp, log, log10, sin, cos, tan, sec, csc, cot
 import Base: sinh, cosh, tanh, asin, acos, atan, acot, asec, acsc
 import Base: asinh, acosh, atanh, expm1, log1p
 import Base: factorial, binomial, numerator, denominator
-import SpecialFunctions: gamma, beta, zeta, besselj, bessely, erfc, erf
-import SpecialFunctions: airyai, airybi
+export gamma, beta, zeta, besselj, bessely, erfc, erf
+export airyai, airybi
 
 export @giac, giac, giac_identifier
 export evaluate, evaluatef, evalf, simplify, expand, to_julia, set!, purge!, giac_vars
@@ -328,9 +328,11 @@ giac(::Irrational{:ℯ}) = giac_e[]
 giac(::Irrational{:π}) = giac_pi[]
 
 one(::Type{T}) where T<:giac = giac_one[]
-one(::giac) = one(giac)
+one(::giac) = giac_one[]
+oneunit(::Type{T}) where T<:giac = giac_one[]
+oneunit(::giac) = giac_one[]
 zero(::Type{T}) where T<:giac = giac_zero[]
-zero(::giac) = zero(giac)
+zero(::giac) = giac_zero[]
 
 
 
@@ -387,6 +389,7 @@ function /(a::giac, b::giac)
 end   
 /(a::giac, b::Number) = a/giac(b)
 /(a::Number, b::giac) = giac(a)/b
+inv(a::giac) = giac_one[]/a
 
 function ^(a::giac, b::giac)
     _gen(ccall(dlsym(libgiac_c[], "giac_pow"), Ptr{Nothing}, (Ptr{Nothing},Ptr{Nothing},Ptr{Nothing}), a.g, b.g, context_ptr[]))
@@ -479,6 +482,8 @@ for F in (:real, :imag, :conj, :abs,
        end   
    end
 end
+
+adjoint(x::giac) = conj(x)
 
 
 function giac(f::Symbol, arg)
@@ -649,7 +654,7 @@ function convert(::Type{T}, ex::Union{giac_SYMB,giac_IDNT}) where T<:Number
    error("Could not convert to number")
 end   
 
-function Base.convert(::Type{Function}, f::Union{Giac.giac_SYMB,Giac.giac_IDNT}) 
+function convert(::Type{Function}, f::Union{Giac.giac_SYMB,Giac.giac_IDNT}) 
     a = args(evaluate(f))
     to_julia(to_julia(a[3]),to_julia(a[1])...)
 end   
