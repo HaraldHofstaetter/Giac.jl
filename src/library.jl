@@ -51,6 +51,7 @@ simplify(x) = x
 
 evaluate(ex::giac) = giac(:eval, ex)
 evaluatef(ex::giac) = giac(:evalf, ex)
+evaluatef(ex::giac, n::Int) = giac(:evalf, ex, n)
 evalf = evaluatef
 simplify(ex::giac) = giac(:simplify, ex)
 factor(ex::giac) = giac(:factor, ex)

@@ -97,7 +97,7 @@ end
     _FLOAT_=21 # immediate, _FLOAT_val
 )
 
-config_vars = (:Digits, :epsilon)
+config_vars = (:Digits, :epsilon, :approx_mode, :complex_mode, :complex_variables)
 
 giactype(g::giac) = unsafe_load(Ptr{UInt8}(g.g), 1) & 31 
 subtype(g::giac) = unsafe_load(Ptr{UInt8}(g.g), 2) & 31
