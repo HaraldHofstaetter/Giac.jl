@@ -1,5 +1,5 @@
 __precompile__()
-module Giac
+module Giac1
 
 using Libdl
 
@@ -35,8 +35,23 @@ export trigsin, trigcos, trigtan, atrig2log, tlin, tcollect, trigexpand
 export trig2exp
 export gbasis, greduce, factor
 
+#mutable struct _giac
+#end
+#const giac_ptr = Ptr{_giac}
 
-abstract type giac end
+const giac_ptr = Ptr{Nothing}
+
+mutable struct giac
+    g::giac_ptr
+    function giac(g::giac_ptr)
+        gg = new(g)
+        finalizer(_delete, gg)
+        gg
+    end
+end
+
+
+
 
 const libgiac_c = Ref{Ptr{Cvoid}}(0)
 const context_ptr = Ref{Ptr{Cvoid}}()
@@ -90,152 +105,15 @@ end
 
 config_vars = (:Digits, :epsilon)
 
-mutable struct giac_INT_ <: giac
-    g::Ptr{Nothing}
-end
-
-mutable struct giac_DOUBLE_ <: giac
-    g::Ptr{Nothing}
-end
-
-mutable struct giac_ZINT <: giac
-    g::Ptr{Nothing}
-end
-
-mutable struct giac_REAL  <: giac
-    g::Ptr{Nothing}
-end
-
-mutable struct giac_CPLX <: giac
-    g::Ptr{Nothing}
-end
-
-mutable struct giac_POLY <: giac
-    g::Ptr{Nothing}
-end
-
-mutable struct giac_IDNT <: giac
-    g::Ptr{Nothing}
-end
-
-mutable struct giac_VECT <: giac
-    g::Ptr{Nothing}
-end
-
-mutable struct giac_SYMB <: giac
-    g::Ptr{Nothing}
-end
-
-mutable struct giac_SPOL1 <: giac
-    g::Ptr{Nothing}
-end
-
-mutable struct giac_FRAC <: giac
-    g::Ptr{Nothing}
-end
-
-mutable struct giac_EXT <: giac
-    g::Ptr{Nothing}
-end
-
-mutable struct giac_STRNG <: giac
-    g::Ptr{Nothing}
-end
-
-mutable struct giac_FUNC <: giac
-    g::Ptr{Nothing}
-end
-
-mutable struct giac_ROOT <: giac
-    g::Ptr{Nothing}
-end
-
-mutable struct giac_MOD <: giac
-    g::Ptr{Nothing}
-end
-
-mutable struct giac_USER <: giac
-    g::Ptr{Nothing}
-end
-
-mutable struct giac_MAP <: giac
-    g::Ptr{Nothing}
-end
-
-mutable struct giac_EQW <: giac
-    g::Ptr{Nothing}
-end
-
-mutable struct giac_GROB <: giac
-    g::Ptr{Nothing}
-end
-
-mutable struct giac_POINTER_ <: giac
-    g::Ptr{Nothing}
-end
-
-mutable struct giac_FLOAT_ <: giac
-    g::Ptr{Nothing}
-end
-
-giacReal = Union{giac_INT_,giac_DOUBLE_,giac_ZINT, giac_REAL, giac_FLOAT_}
-giacNumber = Union{giac_INT_,giac_DOUBLE_,giac_ZINT, giac_REAL, giac_FLOAT_, giac_CPLX}
-
-function _gen(g::Ptr{Nothing})
-   t = unsafe_load(Ptr{UInt8}(g), 1) & 31
-   if t==Int( _INT_ )
-       gg = giac_INT_(g)
-   elseif t==Int( _DOUBLE_ )   
-       gg = giac_DOUBLE_(g)
-   elseif t==Int( _ZINT )
-       gg = giac_ZINT(g)
-   elseif t==Int( _REAL )
-       gg = giac_REAL(g)
-   elseif t==Int( _CPLX )
-       gg = giac_CPLX(g)
-   elseif t==Int( _POLY )
-       gg = giac_POLY(g)
-   elseif t==Int( _IDNT )
-       gg = giac_IDNT(g)
-   elseif t==Int( _VECT )
-       gg = giac_VECT(g)
-   elseif t==Int( _SYMB )
-       gg = giac_SYMB(g)
-   elseif t==Int( _SPOL1 )
-       gg = giac_SPOL1(g)
-   elseif t==Int( _FRAC )
-       gg = giac_FRAC(g)
-   elseif t==Int( _EXT )
-       gg = giac_EXT(g)
-   elseif t==Int( _STRNG )
-       gg = giac_STRNG(g)
-   elseif t==Int( _FUNC )
-       gg = giac_FUNC(g)
-   elseif t==Int( _ROOT )
-       gg = giac_ROOT(g)
-   elseif t==Int( _MOD )
-       gg = giac_MOD(g)
-   elseif t==Int( _USER )
-       gg = giac_USER(g)
-   elseif t==Int( _MAP )
-       gg = giac_MAP(g)
-   elseif t==Int( _EQW )
-       gg = giac_EQW(g)
-   elseif t==Int( _GROB )
-       gg = giac_GROB(g)
-   elseif t==Int( _POINTER )
-       gg = giac_POINTER(g)
-   elseif t==Int( _FLOAT_ )
-       gg = giac_FLOAT_(g)
-   else    
-       @assert false "unknown giac_type"
-   end
-   finalizer(_delete, gg)
-   gg
-end
 
 
-subtype(g::giac) = unsafe_load(Ptr{UInt8}(g.g), 2) 
+
+giactype(g::giac) = unsafe_load(Ptr{UInt8}(g.g), 1) & 31 
+subtype(g::giac) = unsafe_load(Ptr{UInt8}(g.g), 2) & 31
+
+isgiacreal(g::giac) = giactype(g) in Int.([_INT_,_DOUBLE_,_ZINT, _REAL, _FLOAT_])
+isgiacnumber(g::giac)  = giactype(g) in Int.([_INT_,_DOUBLE_,_ZINT, _REAL, _FLOAT_, _CPLX])
+
 
 function change_subtype(g::giac, subtype::Integer)
     ccall( dlsym(libgiac_c[], "giac_change_subtype"), Nothing, (Ptr{Nothing},Cint), g.g, subtype)
@@ -249,71 +127,71 @@ end
 giac(x) = giac_undef[]
 
 function giac(g::giac)
-    _gen(ccall(dlsym(libgiac_c[], "giac_copy_gen"), Ptr{Nothing}, (Ptr{Nothing},), g.g))
+    giac(ccall(dlsym(libgiac_c[], "giac_copy_gen"), Ptr{Nothing}, (Ptr{Nothing},), g.g))
 end   
 
 function giac(val::Bool)
-    g = _gen(ccall(dlsym(libgiac_c[], "giac_new_int"), Ptr{Nothing}, (Cint,), val ? 1 : 0))
+    g = giac(ccall(dlsym(libgiac_c[], "giac_new_int"), Ptr{Nothing}, (Cint,), val ? 1 : 0))
     change_subtype(g, 6)
     g
 end    
 
 function giac(val::Cint)
-    _gen(ccall(dlsym(libgiac_c[], "giac_new_int"), Ptr{Nothing}, (Cint,), val))
+    giac(ccall(dlsym(libgiac_c[], "giac_new_int"), Ptr{Nothing}, (Cint,), val))
 end
 
 function giac(val::Int64)
-    _gen(ccall(dlsym(libgiac_c[], "giac_new_int64_t"), Ptr{Nothing}, (Int64,), val))
+    giac(ccall(dlsym(libgiac_c[], "giac_new_int64_t"), Ptr{Nothing}, (Int64,), val))
 end
 
 function giac(val::BigInt)
-    _gen(ccall(dlsym(libgiac_c[], "giac_new_bigint"), Ptr{Nothing}, (Ref{BigInt},), val))
+    giac(ccall(dlsym(libgiac_c[], "giac_new_bigint"), Ptr{Nothing}, (Ref{BigInt},), val))
 end
 
 function giac(val::Rational)
-    _gen(ccall(dlsym(libgiac_c[], "giac_new_rational"), Ptr{Nothing}, (Ptr{Nothing},Ptr{Nothing}), giac(val.num).g, giac(val.den).g))
+    giac(ccall(dlsym(libgiac_c[], "giac_new_rational"), Ptr{Nothing}, (Ptr{Nothing},Ptr{Nothing}), giac(val.num).g, giac(val.den).g))
 end
 
 #does not seem to work properly
 #function giac(val::Int128)
-#    _gen(ccall(dlsym(libgiac_c[], "giac_new_int128_t"), Ptr{Nothing}, (Int128,), val))
+#    giac(ccall(dlsym(libgiac_c[], "giac_new_int128_t"), Ptr{Nothing}, (Int128,), val))
 #end
 
 function giac(val::Cdouble)
-    _gen(ccall(dlsym(libgiac_c[], "giac_new_double"), Ptr{Nothing}, (Cdouble,), val))
+    giac(ccall(dlsym(libgiac_c[], "giac_new_double"), Ptr{Nothing}, (Cdouble,), val))
 end
 
 function giac(val::BigFloat)
-    _gen(ccall(dlsym(libgiac_c[], "giac_new_bigfloat"), Ptr{Nothing}, (Ref{BigFloat},), val))
+    giac(ccall(dlsym(libgiac_c[], "giac_new_bigfloat"), Ptr{Nothing}, (Ref{BigFloat},), val))
 end
 
 
 function giac(val::Complex)
-    _gen(ccall(dlsym(libgiac_c[], "giac_new_complex"), Ptr{Nothing}, (Ptr{Nothing},Ptr{Nothing}), giac(real(val)).g, giac(imag(val)).g))
+    giac(ccall(dlsym(libgiac_c[], "giac_new_complex"), Ptr{Nothing}, (Ptr{Nothing},Ptr{Nothing}), giac(real(val)).g, giac(imag(val)).g))
 end
 
 
 function giac(val::Complex{Cint})  
-    _gen(ccall(dlsym(libgiac_c[], "giac_new_complex_int"), Ptr{Nothing}, (Cint, Cint), real(val), real(val)))
+    giac(ccall(dlsym(libgiac_c[], "giac_new_complex_int"), Ptr{Nothing}, (Cint, Cint), real(val), real(val)))
 end
 
 
 function giac(val::Complex{Cdouble})  
-    _gen(ccall(dlsym(libgiac_c[], "giac_new_complex_double"), Ptr{Nothing}, (Cdouble, Cdouble), real(val), real(val)))
+    giac(ccall(dlsym(libgiac_c[], "giac_new_complex_double"), Ptr{Nothing}, (Cdouble, Cdouble), real(val), real(val)))
 end
 
 function giac_identifier(s::AbstractString)
-    _gen(ccall(dlsym(libgiac_c[], "giac_new_ident"), Ptr{Nothing}, (Cstring,), s))
+    giac(ccall(dlsym(libgiac_c[], "giac_new_ident"), Ptr{Nothing}, (Cstring,), s))
 end
 
 
 function giac(s::AbstractString)
-    _gen(ccall(dlsym(libgiac_c[], "giac_new_symbolic"), Ptr{Nothing}, (Cstring,Ptr{Nothing}), s, context_ptr[]))
+    giac(ccall(dlsym(libgiac_c[], "giac_new_symbolic"), Ptr{Nothing}, (Cstring,Ptr{Nothing}), s, context_ptr[]))
 end
 
 function giac(v::Array{T,1}; subtype::Integer=0) where T
     v1 = Ptr{Nothing}[giac(i).g for i in v]
-    _gen(ccall(dlsym(libgiac_c[], "giac_new_vector"), Ptr{Nothing}, 
+    giac(ccall(dlsym(libgiac_c[], "giac_new_vector"), Ptr{Nothing}, 
               (Ptr{Ptr{Nothing}},Cint,Cshort), 
                v1, length(v1), subtype))
 end
@@ -362,37 +240,37 @@ show(io::IO, g::giac) = print(io, string(g))
 
    
 function +(a::giac, b::giac)
-    _gen(ccall(dlsym(libgiac_c[], "giac_plus"), Ptr{Nothing}, (Ptr{Nothing},Ptr{Nothing}), a.g, b.g))
+    giac(ccall(dlsym(libgiac_c[], "giac_plus"), Ptr{Nothing}, (Ptr{Nothing},Ptr{Nothing}), a.g, b.g))
 end   
 +(a::giac, b::Number) = a+giac(b)
 +(a::Number, b::giac) = giac(a)+b
 +(a::giac) = a
 
 function -(a::giac, b::giac)
-    _gen(ccall(dlsym(libgiac_c[], "giac_minus"), Ptr{Nothing}, (Ptr{Nothing},Ptr{Nothing}), a.g, b.g))
+    giac(ccall(dlsym(libgiac_c[], "giac_minus"), Ptr{Nothing}, (Ptr{Nothing},Ptr{Nothing}), a.g, b.g))
 end   
 -(a::giac, b::Number) = a-giac(b)
 -(a::Number, b::giac) = giac(a)-b
 
 function -(a::giac)
-    _gen(ccall(dlsym(libgiac_c[], "giac_uminus"), Ptr{Nothing}, (Ptr{Nothing},), a.g))
+    giac(ccall(dlsym(libgiac_c[], "giac_uminus"), Ptr{Nothing}, (Ptr{Nothing},), a.g))
 end   
 
 function *(a::giac, b::giac)
-    _gen(ccall(dlsym(libgiac_c[], "giac_times"), Ptr{Nothing}, (Ptr{Nothing},Ptr{Nothing}), a.g, b.g))
+    giac(ccall(dlsym(libgiac_c[], "giac_times"), Ptr{Nothing}, (Ptr{Nothing},Ptr{Nothing}), a.g, b.g))
 end   
 *(a::giac, b::Number) = a*giac(b)
 *(a::Number, b::giac) = giac(a)*b
 
 function /(a::giac, b::giac)
-    _gen(ccall(dlsym(libgiac_c[], "giac_rdiv"), Ptr{Nothing}, (Ptr{Nothing},Ptr{Nothing}), a.g, b.g))
+    giac(ccall(dlsym(libgiac_c[], "giac_rdiv"), Ptr{Nothing}, (Ptr{Nothing},Ptr{Nothing}), a.g, b.g))
 end   
 /(a::giac, b::Number) = a/giac(b)
 /(a::Number, b::giac) = giac(a)/b
 inv(a::giac) = giac_one[]/a
 
 function ^(a::giac, b::giac)
-    _gen(ccall(dlsym(libgiac_c[], "giac_pow"), Ptr{Nothing}, (Ptr{Nothing},Ptr{Nothing},Ptr{Nothing}), a.g, b.g, context_ptr[]))
+    giac(ccall(dlsym(libgiac_c[], "giac_pow"), Ptr{Nothing}, (Ptr{Nothing},Ptr{Nothing},Ptr{Nothing}), a.g, b.g, context_ptr[]))
 end   
 ^(a::giac, b::Integer) = a^giac(b)  # to ovverride ^(::Any, Integer) which is already defined
 ^(a::giac, b::Number) = a^giac(b)
@@ -404,27 +282,20 @@ end
 ==(a::giac, b::Number) = a==giac(b)
 ==(a::Number, b::giac) = giac(a)==b
 
-function >(a::giacReal, b::giacReal)
+function >(a::giac, b::giac)
     ccall(dlsym(libgiac_c[], "giac_greater_than"), Cint, (Ptr{Nothing},Ptr{Nothing}), a.g, b.g)!=0
 end   
-<(a::giacReal, b::giacReal) = b>a
-<=(a::giacReal, b::giacReal) = !(a>b)
->=(a::giacReal, b::giacReal) = !(b>a)
-<=(a::giacReal, b::Real) = a<=giac(b)
-<=(a::Real, b::giacReal) = giac(a)<=b
->=(a::giacReal, b::Real) = a>=giac(b)
->=(a::Real, b::giacReal) = giac(a)>=b
->(a::giacReal, b::Real) = a>giac(b)
-<(a::Real, b::giacReal) = giac(a)<b
-<(a::giacReal, b::Real) = a<giac(b)
->(a::Real, b::giacReal) = giac(a)>b
-
-*(x::giac, a::Array) = (y->x*y).(a)
-*(a::Array, x::giac) = (y->y*x).(a)
-+(x::giac, a::Array) = (y->x+y).(a)
-+(a::Array, x::giac) = (y->y+x).(a)
--(x::giac, a::Array) = (y->x-y).(a)
--(a::Array, x::giac) = (y->y-x).(a)
+<(a::giac, b::giac) = b>a
+<=(a::giac, b::giac) = !(a>b)
+>=(a::giac, b::giac) = !(b>a)
+<=(a::giac, b::Real) = a<=giac(b)
+<=(a::Real, b::giac) = giac(a)<=b
+>=(a::giac, b::Real) = a>=giac(b)
+>=(a::Real, b::giac) = giac(a)>=b
+>(a::giac, b::Real) = a>giac(b)
+<(a::Real, b::giac) = giac(a)<b
+<(a::giac, b::Real) = a<giac(b)
+>(a::Real, b::giac) = giac(a)>b
 
 function size(g::giac)
     ccall(dlsym(libgiac_c[], "giac_size1"), Cint, (Ptr{Nothing},), g.g)
@@ -432,39 +303,18 @@ end
 
 length(g::giac) = size(g) # 
 
-function getindex(g::giac_VECT, i)
-    _gen(ccall(dlsym(libgiac_c[], "giac_getindex"), Ptr{Nothing}, (Ptr{Nothing},Cint), g.g, i-1))
+function getindex(g::giac, i)
+    giac(ccall(dlsym(libgiac_c[], "giac_getindex"), Ptr{Nothing}, (Ptr{Nothing},Cint), g.g, i-1))
 end
 
-#function call(g::giac, x)
-function (g::Giac.giac_FUNC)(x)
-    _gen(ccall(dlsym(libgiac_c[], "giac_call"), Ptr{Nothing}, 
+function (g::giac)(x)
+    giac(ccall(dlsym(libgiac_c[], "giac_call"), Ptr{Nothing}, 
     (Ptr{Nothing},Ptr{Nothing},Ptr{Nothing}), g.g, giac(x).g, context_ptr[]))
 end
 
-function (g::Giac.giac_IDNT)(x)
-    _gen(ccall(dlsym(libgiac_c[], "giac_call"), Ptr{Nothing}, 
-    (Ptr{Nothing},Ptr{Nothing},Ptr{Nothing}), g.g, giac(x).g, context_ptr[]))
-end
 
-function (g::Giac.giac_SYMB)(x)
-    _gen(ccall(dlsym(libgiac_c[], "giac_call"), Ptr{Nothing}, 
-    (Ptr{Nothing},Ptr{Nothing},Ptr{Nothing}), g.g, giac(x).g, context_ptr[]))
-end
-
-#function call(g::giac, x...)
-function (g::Giac.giac_FUNC)(x...)
-    _gen(ccall(dlsym(libgiac_c[], "giac_call"), Ptr{Nothing}, 
-    (Ptr{Nothing},Ptr{Nothing},Ptr{Nothing}), g.g, giac([x...],subtype=1).g, context_ptr[]))
-end
-
-function (g::Giac.giac_IDNT)(x...)
-    _gen(ccall(dlsym(libgiac_c[], "giac_call"), Ptr{Nothing}, 
-    (Ptr{Nothing},Ptr{Nothing},Ptr{Nothing}), g.g, giac([x...],subtype=1).g, context_ptr[]))
-end
-
-function (g::Giac.giac_SYMB)(x...)
-    _gen(ccall(dlsym(libgiac_c[], "giac_call"), Ptr{Nothing}, 
+function (g::giac)(x...)
+    giac(ccall(dlsym(libgiac_c[], "giac_call"), Ptr{Nothing}, 
     (Ptr{Nothing},Ptr{Nothing},Ptr{Nothing}), g.g, giac([x...],subtype=1).g, context_ptr[]))
 end
 
@@ -478,7 +328,7 @@ for F in (:real, :imag, :conj, :abs,
           :asinh, :acosh, :atanh)
    @eval begin
        function ($F)(a::giac)
-           _gen(ccall(dlsym(libgiac_c[], $(string("giac_",F))), Ptr{Nothing}, (Ptr{Nothing},Ptr{Nothing}), a.g, context_ptr[]))
+           giac(ccall(dlsym(libgiac_c[], $(string("giac_",F))), Ptr{Nothing}, (Ptr{Nothing},Ptr{Nothing}), a.g, context_ptr[]))
        end   
    end
 end
@@ -487,7 +337,7 @@ adjoint(x::giac) = conj(x)
 
 
 function giac(f::Symbol, arg)
-    _gen(ccall(dlsym(libgiac_c[], string("giac_", f)), Ptr{Nothing}, (Ptr{Nothing},Ptr{Nothing}), giac(arg).g, context_ptr[]))
+    giac(ccall(dlsym(libgiac_c[], string("giac_", f)), Ptr{Nothing}, (Ptr{Nothing},Ptr{Nothing}), giac(arg).g, context_ptr[]))
 end   
 
 giac(f::Symbol, args...) = giac(f, giac(Any[args...], subtype=1))
@@ -555,57 +405,83 @@ end
 
 
 to_julia(x) = x
-to_julia(g::giac) = giac(g)
 
-function to_julia(g::giac_INT_)
-    z = ccall(dlsym(libgiac_c[], "giac_get_int"), Cint, (Ptr{Nothing},), g.g)
+function to_julia(g::giac)
+  T = giactype(g)
+  if T==Int(_INT_) 
+
+   z = ccall(dlsym(libgiac_c[], "giac_get_int"), Cint, (Ptr{Nothing},), g.g)
    if subtype(g)==6 #Bool
        return z==1
    else
        return z
    end    
-end    
 
-to_julia(g::Union{giac_DOUBLE_, giac_FLOAT_}) = 
-ccall(dlsym(libgiac_c[], "giac_get_double"), Cdouble, (Ptr{Nothing},), g.g)
+  elseif T==Int(_DOUBLE_) || T==Int(_FLOAT_)   
+    return ccall(dlsym(libgiac_c[], "giac_get_double"), Cdouble, (Ptr{Nothing},), g.g)
 
-function to_julia(g::giac_ZINT)
+  elseif T==Int(_ZINT)
     z = BigInt()
     m = ccall(dlsym(libgiac_c[], "giac_get_bigint"), Ptr{BigInt}, (Ptr{Nothing},), g.g)
     ccall((:__gmpz_set,:libgmp), Nothing, (Ref{BigInt}, Ptr{BigInt}), z, m)
-    z
-end
+    return z
 
-function to_julia(g::giac_REAL)
+  elseif T==Int(_REAL)
     z = BigFloat()
     m = ccall(dlsym(libgiac_c[], "giac_get_bigfloat"), Ptr{BigFloat}, (Ptr{Nothing},), g.g)
     ccall((:mpfr_set, :libmpfr), Int32, (Ref{BigFloat}, Ptr{BigFloat}, Int32),
           z, m, 0)
-    z      
+    return z      
+
+  elseif T==Int(_CPLX)
+    return complex(to_julia(real(g)), to_julia(imag(g))) 
+
+  elseif T==Int(_FRAC)
+    return to_julia(numerator(g))//to_julia(denominator(g))
+
+  elseif T==Int(_VECT)
+    return [to_julia(g[i]) for i=1:length(g)]
+  else
+    return g
+  end    
 end
 
-to_julia(g::giac_CPLX) = complex(to_julia(real(g)), to_julia(imag(g))) 
+convert(::Type{giac}, x) = giac(x)
+convert(::Type{giac}, x::giac) = x # to avoid some ambiguities
 
-to_julia(g::giac_FRAC) = to_julia(numerator(g))//to_julia(denominator(g))
-
-to_julia(g::giac_VECT) = [to_julia(g[i]) for i=1:length(g)]
+function convert(::Type{T}, ex::giac) where T<:Number
+    if isgiacnumber(ex)
+        return convert(T,to_julia(ex))
+    end
+    ex = evaluate(ex)
+    if isgiacnumber(ex)
+       return convert(T,to_julia(ex))
+    end   
+    ex = evaluatef(ex)
+    if isgiacnumber(ex)
+       return convert(T,to_julia(ex))
+    end
+    error("Could not convert giac to Number")
+end   
 
 
 _head(ex::giac) = Symbol(string(head(ex))[2:end-1])
 
 function _args(ex)
     a = args(ex)
-    if isa(a, giac_VECT)&&subtype(args(ex))==1
-        a1 = to_julia(a)
+    if isa(a, giac)&&giactype(a)==Int(_VECT)&&subtype(a)==1
+        return to_julia(a)
     else
-        a1 = Any[to_julia(a)]
+        return Any[to_julia(a)]
     end
 end
 
 _expr(x) = x
-_expr(ex::giac_IDNT) = Symbol(string(ex))
 
-function _expr(ex::giac_SYMB)
+function _expr(ex::giac)
+  if giactype(ex)==Int(_IDNT)
+    return Symbol(string(ex))
+  elseif  giactype(ex)==Int(_SYMB)
     h = _head(ex)
     if h==:id
         return _expr(args(ex))
@@ -626,10 +502,14 @@ function _expr(ex::giac_SYMB)
     elseif h==:BesselY
         h=:bessely
     end
-    Expr(:call, h, [_expr(arg) for arg in _args(ex)]...)
+    return Expr(:call, h, [_expr(arg) for arg in _args(ex)]...)
+  else
+    return ex
+  end
 end
 
-function to_julia(ex::giac_SYMB, var::giac_IDNT, vars...) 
+function _xxx_to_julia(ex::giac, var::giac, vars...) 
+    @assert giactype(ex)==Int(_SYMB) && giactype(var)==Int(_IDNT)
     if length(vars) == 0
         eval(Expr(:->, _expr(var), _expr(evaluate(ex))))
     else
@@ -638,25 +518,14 @@ function to_julia(ex::giac_SYMB, var::giac_IDNT, vars...)
     end
 end
 
-convert(::Type{giac}, x) = giac(x)
-convert(::Type{giac}, x::giac) = x # to avoid some ambiguities
-convert(::Type{T}, x::giacNumber) where T<:Number = convert(T,to_julia(x))
 
-function convert(::Type{T}, ex::Union{giac_SYMB,giac_IDNT}) where T<:Number
-   ex = evaluate(ex)
-   if isa(ex, giacNumber)
-      return convert(T,to_julia(ex))
-   end   
-   ex1 = evaluatef(ex)
-   if isa(ex1, giacNumber)
-        return convert(T,to_julia(ex1))
-   end
-   error("Could not convert to number")
-end   
-
-function convert(::Type{Function}, f::Union{Giac.giac_SYMB,Giac.giac_IDNT}) 
-    a = args(evaluate(f))
-    to_julia(to_julia(a[3]),to_julia(a[1])...)
+function convert(::Type{Function}, f::giac) 
+    if giactype(f)==Int(_SYMB) || giactype(f)==Int(_IDNT)
+         a = args(evaluate(f))
+         return _xxx_to_julia(to_julia(a[3]),to_julia(a[1])...)
+    else
+         error("Could not convert giac to Number")
+    end
 end   
 
 end # module
