@@ -7,15 +7,10 @@ Giac/Xcas has to be [installed](https://www-fourier.ujf-grenoble.fr/~parisse/ins
 Then, in a Julia session, type:
 
 ```julia
-Pkg.clone("https://github.com/HaraldHofstaetter/Giac.jl")
-Pkg.build("Giac")
+using Pkg
+Pkg.add(PackageSpec(url="https://github.com/HaraldHofstaetter/Giac.jl"))
 ```
 
 ## Examples
-To get easy access to the examples, copy them into the home directory:
-```julia
-cp(joinpath(homedir(), ".julia/v0.6/Giac/examples/"), joinpath(homedir(), "Giac_examples"), remove_destination=true)
-```
-Then 'Giac_examples' will be listed in the JuliaBox home screen. The examples contain among others
 + [Giac_basics.ipynb](https://github.com/HaraldHofstaetter/Giac.jl/blob/master/examples/Giac_basics.ipynb)
 + [Giac_examples.ipynb](https://github.com/HaraldHofstaetter/Giac.jl/blob/master/examples/Giac_examples.ipynb)
