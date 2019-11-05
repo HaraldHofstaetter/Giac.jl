@@ -58,8 +58,7 @@ const giac_e = Ref{giac}()
 function __init__()
     libgiac_c[] = dlopen(joinpath(dirname(@__FILE__), "..", "deps", "lib",
                          string("libgiac_c.", dlext)))
-    #context_ptr[] = ccall(dlsym(libgiac_c[], "giac_context_ptr"), Ptr{Nothing}, () )
-    context_ptr[] = 0
+    context_ptr[] = ccall(dlsym(libgiac_c[], "giac_context_ptr"), Ptr{Nothing}, () )
     giac_undef[] = giac("undef") 
     global infinity = giac("infinity")
     global plus_inf = giac("plus_inf")
@@ -226,8 +225,8 @@ end
 prettyprint(ex::giac) = display("text/latex", string("\$\$",latex(ex),"\$\$"))
 
 #show(io::IO, g::giac) = print(io, string(g))
-giac_color_on = Base.text_colors[:light_blue]
-giac_color_off = Base.text_colors[:normal]
+const giac_color_on = Base.text_colors[:light_blue]
+const giac_color_off = Base.text_colors[:normal]
 show(io::IO, g::giac) = print(io, giac_color_on, string(g), giac_color_off)
 #show(io::IO, g::giac) = print(io, "giac(\"", string(g), "\")")
 
