@@ -16,7 +16,7 @@ import Base: factorial, binomial, numerator, denominator
 export gamma, beta, zeta, besselj, bessely, erfc, erf
 export airyai, airybi
 
-export @giac, giac, giac_identifier
+export @giac, giac, giac_identifier, type, subtype, isgiacnumber, isgiacreal
 export evaluate, evaluatef, evalf, simplify, expand, to_julia, set!, purge!, giac_vars
 export unapply, latex, prettyprint, head, args 
 export infinity, plus_inf, minus_inf
@@ -70,40 +70,44 @@ function __init__()
     giac_zero[] = giac(0)
 end
 
+const config_vars = (:Digits, :epsilon, :approx_mode, :complex_mode, :complex_variables)
 
-# from giac/dispatch.h:  
-@enum( giac_type, 
-    _INT_= 0,  # int val
-    _DOUBLE_= 1, # double _DOUBLE_val
-    _ZINT= 2, # mpz_t * _ZINTptr
-    _REAL= 3, # mpf_t * _REALptr
-    _CPLX= 4, # gen * _CPLXptr
-    _POLY= 5, # polynome * _POLYptr
-    _IDNT= 6, # identificateur * _IDNTptr
-    _VECT= 7, # vecteur * _VECTptr
-    _SYMB= 8, # symbolic * _SYMBptr
-    _SPOL1= 9, # sparse_poly1 * _SPOL1ptr
-    _FRAC= 10, # fraction * _FRACptr
-    _EXT= 11, # gen * _EXTptr
-    _STRNG= 12, # string * _STRNGptr
-    _FUNC= 13, # unary_fonction_ptr * _FUNCptr
-    _ROOT= 14, # real_complex_rootof *_ROOTptr
-    _MOD= 15, # gen * _MODptr
-    _USER= 16, # giac_user * _USERptr
-    _MAP=17, # map<gen.gen> * _MAPptr
-    _EQW=18, # eqwdata * _EQWptr
-    _GROB=19, # grob * _GROBptr
-    _POINTER_=20, # void * _POINTER_val
-    _FLOAT_=21 # immediate, _FLOAT_val
-)
+function type(g::giac) 
+    t = unsafe_load(Ptr{UInt8}(g.g), 1) & 31 
+    if t<0 || t>21
+        return :UNKNOWN
+    end
+    [
+    # from giac/dispatch.h:  
+    :INT,        #  0 # int val
+    :DOUBLE,     #  1 # double _DOUBLE_val
+    :ZINT,       #  2 # mpz_t * _ZINTptr
+    :REAL,       #  3 # mpf_t * _REALptr
+    :CPLX,       #  4 # gen * _CPLXptr
+    :POLY,       #  5 # polynome * _POLYptr
+    :IDNT,       #  6 # identificateur * _IDNTptr
+    :VECT,       #  7 # vecteur * _VECTptr
+    :SYMB,       #  8 # symbolic * _SYMBptr
+    :SPOL1,      #  9 # sparse_poly1 * _SPOL1ptr
+    :FRAC,       # 10 # fraction * _FRACptr
+    :EXT,        # 11 # gen * _EXTptr
+    :STRNG,      # 12 # string * _STRNGptr
+    :FUNC,       # 13 # unary_fonction_ptr * _FUNCptr
+    :ROOT,       # 14 # real_complex_rootof *_ROOTptr
+    :MOD,        # 15 # gen * _MODptr
+    :USER,       # 16 # giac_user * _USERptr
+    :MAP,        # 17 # map<gen.gen> * _MAPptr
+    :EQW,        # 18 # eqwdata * _EQWptr
+    :GROB,       # 19 # grob * _GROBptr
+    :POINTER,    # 20 # void * _POINTER_val
+    :FLOAT,      # 21 # immediate, _FLOAT_val
+    ][t+1]
+end
 
-config_vars = (:Digits, :epsilon, :approx_mode, :complex_mode, :complex_variables)
+isgiacreal(g::giac) = type(g) in [:INT, :DOUBLE, :ZINT, :REAL, :FLOAT]
+isgiacnumber(g::giac)  = type(g) in [:INT, :DOUBLE, :ZINT, :REAL, :FLOAT, :CPLX]
 
-giactype(g::giac) = unsafe_load(Ptr{UInt8}(g.g), 1) & 31 
 subtype(g::giac) = unsafe_load(Ptr{UInt8}(g.g), 2) & 31
-
-isgiacreal(g::giac) = giactype(g) in Int.([_INT_,_DOUBLE_,_ZINT, _REAL, _FLOAT_])
-isgiacnumber(g::giac)  = giactype(g) in Int.([_INT_,_DOUBLE_,_ZINT, _REAL, _FLOAT_, _CPLX])
 
 
 function change_subtype(g::giac, subtype::Integer)
@@ -398,8 +402,8 @@ end
 to_julia(x) = x
 
 function to_julia(g::giac)
-  T = giactype(g)
-  if T==Int(_INT_) 
+  T = type(g)
+  if T == :INT 
 
    z = ccall(dlsym(libgiac_c[], "giac_get_int"), Cint, (Ptr{Nothing},), g.g)
    if subtype(g)==6 #Bool
@@ -408,29 +412,29 @@ function to_julia(g::giac)
        return z
    end    
 
-  elseif T==Int(_DOUBLE_) || T==Int(_FLOAT_)   
+  elseif T == :DOUBLE || T == :FLOAT
     return ccall(dlsym(libgiac_c[], "giac_get_double"), Cdouble, (Ptr{Nothing},), g.g)
 
-  elseif T==Int(_ZINT)
+  elseif T == :ZINT
     z = BigInt()
     m = ccall(dlsym(libgiac_c[], "giac_get_bigint"), Ptr{BigInt}, (Ptr{Nothing},), g.g)
     ccall((:__gmpz_set,:libgmp), Nothing, (Ref{BigInt}, Ptr{BigInt}), z, m)
     return z
 
-  elseif T==Int(_REAL)
+  elseif T == :REAL
     z = BigFloat()
     m = ccall(dlsym(libgiac_c[], "giac_get_bigfloat"), Ptr{BigFloat}, (Ptr{Nothing},), g.g)
     ccall((:mpfr_set, :libmpfr), Int32, (Ref{BigFloat}, Ptr{BigFloat}, Int32),
           z, m, 0)
     return z      
 
-  elseif T==Int(_CPLX)
+  elseif T == :CPLX
     return complex(to_julia(real(g)), to_julia(imag(g))) 
 
-  elseif T==Int(_FRAC)
+  elseif T == :FRAC
     return to_julia(numerator(g))//to_julia(denominator(g))
 
-  elseif T==Int(_VECT)
+  elseif T == :VECT
     return [to_julia(g[i]) for i=1:length(g)]
   else
     return g
@@ -460,7 +464,7 @@ _head(ex::giac) = Symbol(string(head(ex))[2:end-1])
 
 function _args(ex)
     a = args(ex)
-    if isa(a, giac)&&giactype(a)==Int(_VECT)&&subtype(a)==1
+    if isa(a, giac) && type(a)==:VECT && subtype(a)==1
         return to_julia(a)
     else
         return Any[to_julia(a)]
@@ -470,9 +474,10 @@ end
 _expr(x) = x
 
 function _expr(ex::giac)
-  if giactype(ex)==Int(_IDNT)
+  T = type(ex)
+  if T == :IDNT
     return Symbol(string(ex))
-  elseif  giactype(ex)==Int(_SYMB)
+  elseif  T == :SYMB
     h = _head(ex)
     if h==:id
         return _expr(args(ex))
@@ -500,7 +505,7 @@ function _expr(ex::giac)
 end
 
 function to_julia(ex::giac, var::giac, vars...) 
-    @assert giactype(ex)==Int(_SYMB) && giactype(var)==Int(_IDNT)
+    @assert type(ex)==:SYMB && type(var):IDNT
     if length(vars) == 0
         eval(Expr(:->, _expr(var), _expr(evaluate(ex))))
     else
@@ -511,7 +516,7 @@ end
 
 
 function convert(::Type{Function}, f::giac) 
-    if giactype(f)==Int(_SYMB) || giactype(f)==Int(_IDNT)
+    if type(f)==:SYMB || type(f):IDNT
          a = args(evaluate(f))
          return to_julia(to_julia(a[3]),to_julia(a[1])...)
     else
