@@ -200,11 +200,11 @@ giac(x::AbstractRange{T}) where T = giac(collect(x))
 giac(::Irrational{:ℯ}) = giac_e[]
 giac(::Irrational{:π}) = giac_pi[]
 
-one(::Type{T}) where T<:giac = giac_one[]
+one(::Type{giac}) = giac_one[]
 one(::giac) = giac_one[]
-oneunit(::Type{T}) where T<:giac = giac_one[]
+oneunit(::Type{giac}) = giac_one[]
 oneunit(::giac) = giac_one[]
-zero(::Type{T}) where T<:giac = giac_zero[]
+zero(::Type{giac}) = giac_zero[]
 zero(::giac) = giac_zero[]
 
 
@@ -225,7 +225,10 @@ end
 
 prettyprint(ex::giac) = display("text/latex", string("\$\$",latex(ex),"\$\$"))
 
-show(io::IO, g::giac) = print(io, string(g))
+#show(io::IO, g::giac) = print(io, string(g))
+giac_color_on = Base.text_colors[:light_blue]
+giac_color_off = Base.text_colors[:normal]
+show(io::IO, g::giac) = print(io, giac_color_on, string(g), giac_color_off)
 #show(io::IO, g::giac) = print(io, "giac(\"", string(g), "\")")
 
 
@@ -505,7 +508,7 @@ function _expr(ex::giac)
 end
 
 function to_julia(ex::giac, var::giac, vars...) 
-    @assert type(ex)==:SYMB && type(var):IDNT
+    @assert type(ex)==:SYMB && type(var)==:IDNT
     if length(vars) == 0
         eval(Expr(:->, _expr(var), _expr(evaluate(ex))))
     else
@@ -516,7 +519,7 @@ end
 
 
 function convert(::Type{Function}, f::giac) 
-    if type(f)==:SYMB || type(f):IDNT
+    if type(f)==:SYMB || type(f)==:IDNT
          a = args(evaluate(f))
          return to_julia(to_julia(a[3]),to_julia(a[1])...)
     else
