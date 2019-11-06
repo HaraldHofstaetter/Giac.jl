@@ -301,15 +301,16 @@ function >=(a::giac, b::giac)
     ccall(dlsym(libgiac_c[], "giac_greater_equal"), Cint, (Ptr{Nothing},Ptr{Nothing}), a.g, b.g) !=0
 end   
 
-<(a::giac, b::giac) = b>a
-<=(a::giac, b::Real) = a<=giac(b)
-<=(a::Real, b::giac) = giac(a)<=b
+>(a::giac, b::Real) = a>giac(b)
+>(a::Real, b::giac) = giac(a)>b
 >=(a::giac, b::Real) = a>=giac(b)
 >=(a::Real, b::giac) = giac(a)>=b
->(a::giac, b::Real) = a>giac(b)
+<(a::giac, b::giac) = b>a
 <(a::Real, b::giac) = giac(a)<b
 <(a::giac, b::Real) = a<giac(b)
->(a::Real, b::giac) = giac(a)>b
+<=(a::giac, b::giac) = b>=a
+<=(a::giac, b::Real) = a<=giac(b)
+<=(a::Real, b::giac) = giac(a)<=b
 
 function size(g::giac)
     ccall(dlsym(libgiac_c[], "giac_size1"), Cint, (Ptr{Nothing},), g.g)
