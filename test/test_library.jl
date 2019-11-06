@@ -1,8 +1,7 @@
 using Giac
 using Test
 
-import SpecialFunctions
-SF=SpecialFunctions
+using SpecialFunctions
 
 #For elementary functions we check whether the Giac/Function of a 
 #numerical value computes (approximately) the same result as the
@@ -35,20 +34,22 @@ for (ex, res) in [
     (expm1(giac(0.9)), expm1(0.9)),
     (log1p(giac(0.9)), log1p(0.9)),
 
-    (erf(giac(0.9)), SF.erf(0.9)),
-    (erfc(giac(0.9)), SF.erfc(0.9)),
-    (gamma(giac(0.9)), SF.gamma(0.9)),
-    (beta(giac(0.9),giac(1.9)), SF.beta(0.9,1.9)),
-    (zeta(giac(0.9)), SF.zeta(0.9)),
+    (erf(giac(0.9)), erf(0.9)),
+    (erfc(giac(0.9)), erfc(0.9)),
+    (gamma(giac(0.9)), gamma(0.9)),
+    (beta(giac(0.9),giac(1.9)), beta(0.9,1.9)),
+    (zeta(giac(0.9)), zeta(0.9)),
     (factorial(giac(13)), factorial(13)),
     (binomial(giac(13),giac(7)), binomial(13,7)),
-    (airyai(giac(0.9)), SF.airyai(0.9)), # Giac/Airy_Ai does not work as expected
-    (airybi(giac(0.9)), SF.airybi(0.9)), # Giac/Airy_Bi does not work as expected
-    (besselj(2,giac(0.9)), SF.besselj(2,0.9)),
-    (bessely(2,giac(0.9)), SF.bessely(2,0.9)),
+    (airyai(giac(0.9)), airyai(0.9)), # Giac/Airy_Ai does not work as expected
+    (airybi(giac(0.9)), airybi(0.9)), # Giac/Airy_Bi does not work as expected
+    (besselj(2,giac(0.9)), besselj(2,0.9)),
+    (bessely(2,giac(0.9)), bessely(2,0.9)),
+    (digamma(giac(0.9)), digamma(0.9)),
+    (polygamma(2,giac(0.9)), polygamma(2,0.9)),
+    (sinint(giac(0.9)), sinint(0.9)),
+    (cosint(giac(0.9)), cosint(0.9)),
     (Ei(giac(0.9)), 1.6228117136968674413),
-    (Si(giac(0.9)), 0.86047071074529293277),
-    (Ci(giac(0.9)), 0.27606783046777286015),
 ]
     @test convert(Float64,ex) ≈ res
 end    

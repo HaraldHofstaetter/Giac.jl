@@ -2,6 +2,7 @@ __precompile__()
 module Giac
 
 using Libdl
+using SpecialFunctions
 
 import Base: string, show, write, collect 
 import Base: diff, sum, zeros, length, size, getindex
@@ -13,8 +14,9 @@ import Base: sqrt, exp, log, log10, sin, cos, tan, sec, csc, cot
 import Base: sinh, cosh, tanh, asin, acos, atan, acot, asec, acsc
 import Base: asinh, acosh, atanh, expm1, log1p
 import Base: factorial, binomial, numerator, denominator
-export gamma, beta, zeta, besselj, bessely, erfc, erf
-export airyai, airybi
+import SpecialFunctions: gamma, beta, zeta, besselj, bessely, erfc, erf
+import SpecialFunctions: airyai, airybi, sinint, cosint, polygamma, digamma
+
 
 export @giac, giac, giac_identifier, type, subtype, isgiacnumber, isgiacreal
 export evaluate, evaluatef, evalf, simplify, expand, to_julia, set!, purge!, giac_vars
@@ -23,7 +25,7 @@ export infinity, plus_inf, minus_inf
 
 export partfrac, subst, left, right
 export ⩦, equal
-export Ei, Si, Ci
+export Ei, Psi
 export integrate, limit, series, curl, grad, divergence, hessian
 export preval, sum_riemann, taylor
 export solve, cSolve, cZeros, fSolve, deSolve, linsolve 
@@ -77,6 +79,8 @@ const giac_julia_dictionay = Dict(
     :Beta    => :beta,
     :BesselJ => :besselj,
     :BesselY => :bessely,
+    :Si      => :sinint,
+    :Ci      => :cosint,
     :re      => :real,
     :im      => :imag,
     )
@@ -156,10 +160,9 @@ function giac(val::Rational)
     giac(ccall(dlsym(libgiac_c[], "giac_new_rational"), Ptr{Nothing}, (Ptr{Nothing},Ptr{Nothing}), giac(val.num).g, giac(val.den).g))
 end
 
-#does not seem to work properly
-#function giac(val::Int128)
-#    giac(ccall(dlsym(libgiac_c[], "giac_new_int128_t"), Ptr{Nothing}, (Int128,), val))
-#end
+function giac(val::Int128)
+    giac(ccall(dlsym(libgiac_c[], "giac_new_int128_t"), Ptr{Nothing}, (Int128,), val))
+end
 
 function giac(val::Cdouble)
     giac(ccall(dlsym(libgiac_c[], "giac_new_double"), Ptr{Nothing}, (Cdouble,), val))
