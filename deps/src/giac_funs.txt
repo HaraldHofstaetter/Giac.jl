@@ -947,8 +947,8 @@ subst
 sum
 Sum
 sum_riemann
-superieur_egal
-superieur_strict
+#superieur_egal
+#superieur_strict
 suppress
 surd
 svd

@@ -294,11 +294,14 @@ end
 ==(a::Number, b::giac) = giac(a)==b
 
 function >(a::giac, b::giac)
-    ccall(dlsym(libgiac_c[], "giac_greater_than"), Cint, (Ptr{Nothing},Ptr{Nothing}), a.g, b.g)!=0
+    ccall(dlsym(libgiac_c[], "giac_greater_than"), Cint, (Ptr{Nothing},Ptr{Nothing}), a.g, b.g) !=0
 end   
+
+function >=(a::giac, b::giac)
+    ccall(dlsym(libgiac_c[], "giac_greater_equal"), Cint, (Ptr{Nothing},Ptr{Nothing}), a.g, b.g) !=0
+end   
+
 <(a::giac, b::giac) = b>a
-<=(a::giac, b::giac) = !(a>b)
->=(a::giac, b::giac) = !(b>a)
 <=(a::giac, b::Real) = a<=giac(b)
 <=(a::Real, b::giac) = giac(a)<=b
 >=(a::giac, b::Real) = a>=giac(b)

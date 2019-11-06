@@ -353,6 +353,13 @@ extern "C" {
         return (*a0)>(*b0)?1:0;
     }
 
+    int giac_greater_equal(_Gen *a, _Gen *b)
+    {
+        gen* a0 = reinterpret_cast<gen*>(a);
+        gen* b0 = reinterpret_cast<gen*>(b);
+        return ((*a0)==(*b0))||((*a0)>(*b0))?1:0; // >= not available
+    }
+
     int giac_size1(_Gen *g)
     {
         gen* g0 = reinterpret_cast<gen*>(g);

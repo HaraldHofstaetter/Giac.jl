@@ -56,8 +56,10 @@ extern "C"
     _Gen* giac_uminus(_Gen *a);
     _Gen* giac_pow(_Gen *a, _Gen *b, void *context_ptr);
 
+
     int giac_equal_bool(_Gen *a, _Gen *b);
     int giac_greater_than(_Gen *a, _Gen *b);
+    int giac_greater_equal(_Gen *a, _Gen *b);
     int giac_size1(_Gen *g);
 
     _Gen* giac_getindex(_Gen* a, int i);
