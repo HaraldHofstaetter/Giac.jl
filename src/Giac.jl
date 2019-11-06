@@ -71,6 +71,16 @@ end
 
 const config_vars = (:Digits, :epsilon, :approx_mode, :complex_mode, :complex_variables)
 
+const giac_julia_dictionay = Dict(
+    :ln      => :log, 
+    :Gamma   => :gamma,    
+    :Beta    => :beta,
+    :BesselJ => :besselj,
+    :BesselY => :bessely,
+    :re      => :real,
+    :im      => :imag,
+    )
+
 function type(g::giac) 
     t = unsafe_load(Ptr{UInt8}(g.g), 1) & 31 
     if t<0 || t>21
@@ -206,17 +216,18 @@ oneunit(::giac) = giac_one[]
 zero(::Type{giac}) = giac_zero[]
 zero(::giac) = giac_zero[]
 
-
+const _r_giac_julia = Regex(string("\\b(",join(keys(giac_julia_dictionay),"|"),")\\("))
+_f_giac_julia(x) = string(giac_julia_dictionay[Symbol(x[1:end-1])], x[end])
 
 function string(g::giac)
-    cs = ccall(dlsym(libgiac_c[], "giac_to_string"), Ptr{UInt8}, (Ptr{Nothing},Ptr{Nothing}), g.g, context_ptr[]) 
+   cs = ccall(dlsym(libgiac_c[], "giac_to_string"), Ptr{UInt8}, (Ptr{Nothing},Ptr{Nothing}), g.g, context_ptr[]) 
    s = unsafe_string(cs)
    ccall(dlsym(libgiac_c[], "giac_free"), Nothing, (Ptr{Nothing},), cs)
-   s
-end
+   replace(s, _r_giac_julia => _f_giac_julia)
+end   
 
 function latex(g::giac)
-    cs = ccall(dlsym(libgiac_c[], "giac_to_latex"), Ptr{UInt8}, (Ptr{Nothing},Ptr{Nothing}), g.g, context_ptr[]) 
+   cs = ccall(dlsym(libgiac_c[], "giac_to_latex"), Ptr{UInt8}, (Ptr{Nothing},Ptr{Nothing}), g.g, context_ptr[]) 
    s = unsafe_string(cs)
    ccall(dlsym(libgiac_c[], "giac_free"), Nothing, (Ptr{Nothing},), cs)
    s
@@ -489,17 +500,7 @@ function _expr(ex::giac)
         h = _head(ex)
         @assert h!=:of "could not evaluate user-defined function"
     end
-    if h==:ln  #giac/ln corresponds to Julia/log 
-        h=:log
-    elseif h==:Gamma
-        h=:gamma
-    elseif h==:Beta
-        h=:beta
-    elseif h==:BesselJ
-        h=:besselj
-    elseif h==:BesselY
-        h=:bessely
-    end
+    h = get(giac_julia_dictionay, h, h)
     return Expr(:call, h, [_expr(arg) for arg in _args(ex)]...)
   else
     return ex
