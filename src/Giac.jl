@@ -18,9 +18,9 @@ import SpecialFunctions: gamma, beta, zeta, besselj, bessely, erfc, erf
 import SpecialFunctions: airyai, airybi, sinint, cosint, polygamma, digamma
 
 
-export @giac, giac, giac_identifier, type, subtype, isgiacnumber, isgiacreal
+export @giac, @vars, giac, giac_identifier, type, subtype, isgiacnumber, isgiacreal
 export evaluate, evaluatef, evalf, simplify, expand, to_julia, set!, purge!, giac_vars
-export unapply, latex, prettyprint, head, args 
+export unapply, latex, prettyprint, head, args, lambdify 
 export infinity, plus_inf, minus_inf
 
 export partfrac, subst, left, right
@@ -415,6 +415,9 @@ macro giac(x...)
 end
 
 
+@eval const $(Symbol("@vars")) = $(Symbol("@giac"))
+
+
 to_julia(x) = x
 
 function to_julia(g::giac)
@@ -510,7 +513,13 @@ function _expr(ex::giac)
   end
 end
 
-function to_julia(ex::giac, var::giac, vars...) 
+"""
+    lambdify(ex, vars...)
+
+Take a symbolic expression and return an anonymous `Julia` function
+
+"""    
+function lambdify(ex::giac, var::giac, vars...) 
     @assert type(ex)==:SYMB && type(var)==:IDNT
     if length(vars) == 0
         eval(Expr(:->, _expr(var), _expr(evaluate(ex))))
@@ -524,7 +533,7 @@ end
 function convert(::Type{Function}, f::giac) 
     if type(f)==:SYMB || type(f)==:IDNT
          a = args(evaluate(f))
-         return to_julia(to_julia(a[3]),to_julia(a[1])...)
+         return lambdify(to_julia(a[3]),to_julia(a[1])...)
     else
          error("Could not convert giac to Function")
     end
