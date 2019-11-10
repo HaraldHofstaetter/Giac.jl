@@ -58,8 +58,11 @@ const giac_pi = Ref{giac}()
 const giac_e = Ref{giac}()
 
 function __init__()
-    libgiac_c[] = dlopen(joinpath(dirname(@__FILE__), "..", "deps", "lib",
-                         string("libgiac_c.", dlext)))
+    libgiac_c[] = try
+        dlopen(joinpath("/usr","lib","libgiac.$dlext"))
+    catch
+        dlopen(joinpath(@__DIR__, "..", "deps", "lib","libgiac_c.$dlext"))
+    end
     context_ptr[] = ccall(dlsym(libgiac_c[], "giac_context_ptr"), Ptr{Nothing}, () )
     giac_undef[] = giac("undef") 
     global infinity = giac("infinity")
